@@ -1,0 +1,44 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Admin - Subscription Plans{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Subscription Plans Management</h2>
+    
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'admin_subscription_plan_create' %}" class="button button-success">Create New Plan</a>
+        <a href="/admin/" class="button">Django Admin</a>
+    </div>
+
+    {% if plans %}
+    <div class="plans-list">
+        {% for plan in plans %}
+        <div class="card" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h3>{{ plan.name }} <span style="font-size: 0.8rem; color: #666;">({{ plan.get_level_display }})</span></h3>
+                    <p><strong>Membership Fee:</strong> ₹{{ plan.membership_fee }}</p>
+                    <p><strong>Duration:</strong> {{ plan.duration_days }} days</p>
+                    <p><strong>Status:</strong> 
+                        <span style="color: {% if plan.is_active %}green{% else %}red{% endif %};">
+                            {{ plan.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </p>
+                    {% if plan.description %}
+                    <p>{{ plan.description }}</p>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'admin_subscription_plan_update' plan.id %}" class="button">Edit</a>
+                    <a href="/admin/food_delivery/subscriptionplan/{{ plan.id }}/change/" class="button button-warning">Admin Edit</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No subscription plans found. <a href="{% url 'admin_subscription_plan_create' %}">Create the first one</a></p>
+    {% endif %}
+</div>
+{% endblock %}

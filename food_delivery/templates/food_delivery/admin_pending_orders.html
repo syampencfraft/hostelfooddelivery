@@ -1,0 +1,68 @@
+<!-- food_delivery/templates/food_delivery/admin_pending_orders.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Admin: Manage Pending Orders{% endblock %}
+
+{% block content %}
+    <h2>Admin: Manage Pending Orders & Deliveries</h2>
+
+    {% if pending_orders %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Resident</th>
+                    <th>Meal Plan</th>
+                    <th>Current Status</th>
+                    <th>Delivery Agent</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in pending_orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.order_date }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>{{ order.meal_plan.name }}</td>
+                        <td>{{ order.get_status_display|capfirst }}</td>
+                        <td>
+                            {% if order.delivery_agent %}
+                                {{ order.delivery_agent.username }}
+                            {% else %}
+                                Unassigned
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_assign_delivery_agent' order.id %}" class="button" style="padding: 5px 10px; font-size: 0.85em;">
+                                {% if order.delivery_agent %}Reassign{% else %}Assign Agent{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No pending or active orders to manage.</p>
+    {% endif %}
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+{% endblock %}

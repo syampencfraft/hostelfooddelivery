@@ -1,0 +1,30 @@
+<!-- food_delivery/templates/food_delivery/custom_admin/dashboard.html -->
+{% extends 'food_delivery/custom_admin/_admin_base.html' %}
+
+{% block admin_content %}
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, {{ user.username }}. Here is a summary of the system activity.</p>
+    
+    <div class="dashboard-section">
+        <h3>Live Stats</h3>
+        <ul>
+            <li>Active Subscriptions: <strong>{{ total_active_subscriptions }}</strong></li>
+            <li>Pending Orders Today: <strong>{{ pending_daily_orders_today }}</strong></li>
+            <li>Total Vendors: <strong>{{ vendors_count }}</strong></li>
+            <li>Total Delivery Agents: <strong>{{ delivery_agents_count }}</strong></li>
+        </ul>
+    </div>
+
+    <div class="dashboard-section">
+        <h3>Recent Orders</h3>
+        {% if recent_orders %}
+            <ul>
+            {% for order in recent_orders %}
+                <li>Order #{{ order.id }} by {{ order.user.username }} on {{ order.order_date }} - Status: {{ order.get_status_display }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recent orders.</p>
+        {% endif %}
+    </div>
+{% endblock %}

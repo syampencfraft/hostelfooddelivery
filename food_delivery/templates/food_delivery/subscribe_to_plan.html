@@ -1,0 +1,20 @@
+<!-- food_delivery/templates/food_delivery/subscribe_to_plan.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Subscribe to {{ plan.name }}{% endblock %}
+
+{% block content %}
+    <h2>Confirm Subscription</h2>
+    <div class="dashboard-section">
+        <h3>{{ plan.name }}</h3>
+        <p>{{ plan.description }}</p>
+        <p><strong>Price:</strong> ₹{{ plan.base_price }} for {{ plan.duration_days }} days.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <p>Click below to confirm your subscription and proceed with a mock payment.</p>
+        <button type="submit" class="button button-success">Confirm & Pay (Mock)</button>
+        <a href="{% url 'subscription_plans' %}" class="button button-secondary">Cancel</a>
+    </form>
+{% endblock %}

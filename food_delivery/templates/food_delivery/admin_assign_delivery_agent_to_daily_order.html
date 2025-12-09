@@ -1,0 +1,34 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Assign Delivery Agent{% endblock %}
+
+{% block content %}
+<h2>Assign Delivery Agent</h2>
+
+<div class="card">
+    <h3>Order #{{ order.id }}</h3>
+    <p><strong>Customer:</strong> {{ order.user.username }}</p>
+    <p><strong>Meal Type:</strong> {{ order.meal_type.name }}</p>
+    <p><strong>Date:</strong> {{ order.order_date }}</p>
+    <p><strong>Current Status:</strong> {{ order.get_status_display }}</p>
+    <p><strong>Current Delivery Agent:</strong> 
+        {% if order.delivery_agent %}
+            {{ order.delivery_agent.username }}
+        {% else %}
+            <span style="color: red;">Not assigned</span>
+        {% endif %}
+    </p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="{{ form.delivery_agent.id_for_label }}">Select Delivery Agent:</label>
+        {{ form.delivery_agent }}
+    </div>
+    
+    <button type="submit" class="button button-success">Assign Agent</button>
+    <a href="{% url 'admin_pending_daily_orders' %}" class="button">Cancel</a>
+</form>
+{% endblock %}

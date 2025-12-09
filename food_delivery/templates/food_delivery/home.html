@@ -1,0 +1,617 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Delicious Meals Delivered Fast | FoodieExpress{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" style="
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--border-radius);
+    padding: 5rem 3rem;
+    margin-bottom: 4rem;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+">
+    <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 2;">
+        <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 1.5rem; font-family: 'Poppins', sans-serif;">
+            Delicious Food, <span style="color: var(--accent);">Delivered</span> to Your Doorstep
+        </h1>
+        <p style="font-size: 1.3rem; margin-bottom: 2.5rem; opacity: 0.9; line-height: 1.6;">
+            Experience the convenience of fresh, hot meals delivered right to your hostel room. 
+            Subscribe to plans or order daily - your choice!
+        </p>
+        
+        {% if not user.is_authenticated %}
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                <i class="fas fa-user-plus"></i> Get Started Now
+            </a>
+            <a href="#features" class="btn btn-outline" style="
+                padding: 1rem 2.5rem; 
+                font-size: 1.1rem;
+                border-color: white;
+                color: white;
+                background: transparent;
+            ">
+                <i class="fas fa-arrow-down"></i> Learn More
+            </a>
+        </div>
+        {% else %}
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+            {% if user.user_type == 'resident' %}
+            <a href="{% url 'subscription_plans' %}" class="btn" style="
+                padding: 1rem 2.5rem;
+                font-size: 1.1rem;
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: 2px solid white;
+            ">
+                <i class="fas fa-crown"></i> View Plans
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Floating food icons -->
+    <div style="position: absolute; bottom: -30px; left: 5%; font-size: 2rem; color: var(--accent); opacity: 0.3;">
+        <i class="fas fa-pizza-slice"></i>
+    </div>
+    <div style="position: absolute; top: 20%; right: 10%; font-size: 2rem; color: var(--primary); opacity: 0.3;">
+        <i class="fas fa-hamburger"></i>
+    </div>
+    <div style="position: absolute; bottom: 20%; right: 15%; font-size: 2rem; color: var(--success); opacity: 0.3;">
+        <i class="fas fa-ice-cream"></i>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+">
+    <div class="stat-card" style="
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border-top: 4px solid var(--primary);
+    ">
+        <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem;">
+            <i class="fas fa-users"></i>
+        </div>
+        <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">500+</h3>
+        <p style="color: var(--gray); font-weight: 500;">Happy Residents</p>
+    </div>
+    
+    <div class="stat-card" style="
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border-top: 4px solid var(--success);
+    ">
+        <div style="font-size: 2.5rem; color: var(--success); margin-bottom: 0.5rem;">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">1000+</h3>
+        <p style="color: var(--gray); font-weight: 500;">Meals Delivered Daily</p>
+    </div>
+    
+    <div class="stat-card" style="
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border-top: 4px solid var(--accent);
+    ">
+        <div style="font-size: 2.5rem; color: var(--accent); margin-bottom: 0.5rem;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">30 min</h3>
+        <p style="color: var(--gray); font-weight: 500;">Average Delivery Time</p>
+    </div>
+    
+    <div class="stat-card" style="
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border-top: 4px solid var(--info);
+    ">
+        <div style="font-size: 2.5rem; color: var(--info); margin-bottom: 0.5rem;">
+            <i class="fas fa-star"></i>
+        </div>
+        <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">4.8/5</h3>
+        <p style="color: var(--gray); font-weight: 500;">Customer Rating</p>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" style="margin-bottom: 4rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+            How It <span style="color: var(--primary);">Works</span>
+        </h2>
+        <p style="font-size: 1.1rem; color: var(--gray); max-width: 600px; margin: 0 auto;">
+            Simple steps to get delicious food delivered to your room
+        </p>
+    </div>
+    
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    ">
+        <div class="feature-step" style="
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        ">
+            <div style="
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, var(--primary) 0%, #FF8B5C 100%);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0 auto 1.5rem;
+                box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+            ">1</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--secondary);">Sign Up</h3>
+            <p style="color: var(--gray); line-height: 1.6;">
+                Create your account as a resident, vendor, or delivery agent
+            </p>
+        </div>
+        
+        <div class="feature-step" style="
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        ">
+            <div style="
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, var(--secondary) 0%, #3D4166 100%);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0 auto 1.5rem;
+                box-shadow: 0 5px 15px rgba(45, 48, 71, 0.3);
+            ">2</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--secondary);">Choose Plan</h3>
+            <p style="color: var(--gray); line-height: 1.6;">
+                Select a subscription or order daily meals as per your preference
+            </p>
+        </div>
+        
+        <div class="feature-step" style="
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        ">
+            <div style="
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, var(--success) 0%, #00E6B8 100%);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0 auto 1.5rem;
+                box-shadow: 0 5px 15px rgba(0, 200, 150, 0.3);
+            ">3</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--secondary);">Get Food</h3>
+            <p style="color: var(--gray); line-height: 1.6;">
+                Fresh, hot meals delivered to your room at scheduled times
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- User Types Section -->
+<section style="margin-bottom: 4rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+            Join Our <span style="color: var(--primary);">Community</span>
+        </h2>
+        <p style="font-size: 1.1rem; color: var(--gray); max-width: 600px; margin: 0 auto;">
+            Whether you're a resident, vendor, or delivery partner, we have a place for you
+        </p>
+    </div>
+    
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    ">
+        <!-- Resident Card -->
+        <div class="user-type-card" style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F0 100%);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 2px solid var(--primary-light);
+        ">
+            <div style="
+                background: linear-gradient(135deg, var(--primary) 0%, #FF8B5C 100%);
+                padding: 2rem;
+                text-align: center;
+                color: white;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">For Residents</h3>
+                <p>Enjoy delicious meals without leaving your room</p>
+            </div>
+            <div style="padding: 2rem;">
+                <ul style="list-style: none; margin-bottom: 2rem;">
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Subscribe to monthly plans or order daily</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Multiple payment options</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Track your orders in real-time</span>
+                    </li>
+                </ul>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Join as Resident
+                </a>
+                {% elif user.user_type == 'resident' %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Vendor Card -->
+        <div class="user-type-card" style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 2px solid rgba(23, 162, 184, 0.2);
+        ">
+            <div style="
+                background: linear-gradient(135deg, var(--info) 0%, #2CC4E0 100%);
+                padding: 2rem;
+                text-align: center;
+                color: white;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">For Vendors</h3>
+                <p>Reach hundreds of customers daily</p>
+            </div>
+            <div style="padding: 2rem;">
+                <ul style="list-style: none; margin-bottom: 2rem;">
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Manage your menu and daily specials</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Real-time order management</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Analytics and earnings reports</span>
+                    </li>
+                </ul>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn" style="
+                    width: 100%;
+                    background: var(--info);
+                    color: white;
+                ">
+                    <i class="fas fa-user-plus"></i> Join as Vendor
+                </a>
+                {% elif user.user_type == 'vendor' %}
+                <a href="{% url 'dashboard' %}" class="btn" style="
+                    width: 100%;
+                    background: var(--info);
+                    color: white;
+                ">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Delivery Agent Card -->
+        <div class="user-type-card" style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0FFF4 100%);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 2px solid rgba(40, 167, 69, 0.2);
+        ">
+            <div style="
+                background: linear-gradient(135deg, var(--success) 0%, #00E6B8 100%);
+                padding: 2rem;
+                text-align: center;
+                color: white;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">For Delivery Agents</h3>
+                <p>Earn while helping others get their meals</p>
+            </div>
+            <div style="padding: 2rem;">
+                <ul style="list-style: none; margin-bottom: 2rem;">
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Flexible working hours</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Real-time delivery tracking</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>Competitive earnings</span>
+                    </li>
+                </ul>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn" style="
+                    width: 100%;
+                    background: var(--success);
+                    color: white;
+                ">
+                    <i class="fas fa-user-plus"></i> Join as Agent
+                </a>
+                {% elif user.user_type == 'delivery_agent' %}
+                <a href="{% url 'dashboard' %}" class="btn" style="
+                    width: 100%;
+                    background: var(--success);
+                    color: white;
+                ">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section style="margin-bottom: 4rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+            What Our <span style="color: var(--primary);">Customers</span> Say
+        </h2>
+    </div>
+    
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    ">
+        <div class="testimonial" style="
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+        ">
+            <div style="
+                color: var(--accent);
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            ">
+                <i class="fas fa-quote-left"></i>
+            </div>
+            <p style="color: var(--gray); font-style: italic; margin-bottom: 1.5rem; line-height: 1.6;">
+                "The best food delivery service for hostel students! Never miss a meal even during exams."
+            </p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--primary) 0%, #FF8B5C 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                ">RK</div>
+                <div>
+                    <h4 style="margin: 0; color: var(--secondary);">Rahul Kumar</h4>
+                    <p style="margin: 0; color: var(--gray); font-size: 0.9rem;">Hostel Resident</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonial" style="
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+        ">
+            <div style="
+                color: var(--accent);
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            ">
+                <i class="fas fa-quote-left"></i>
+            </div>
+            <p style="color: var(--gray); font-style: italic; margin-bottom: 1.5rem; line-height: 1.6;">
+                "As a vendor, this platform has doubled my daily orders. The management system is fantastic!"
+            </p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--info) 0%, #2CC4E0 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                ">SP</div>
+                <div>
+                    <h4 style="margin: 0; color: var(--secondary);">Spicy Bites</h4>
+                    <p style="margin: 0; color: var(--gray); font-size: 0.9rem;">Food Vendor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="
+    background: linear-gradient(135deg, var(--secondary) 0%, #1a1c2b 100%);
+    border-radius: var(--border-radius);
+    padding: 4rem 2rem;
+    text-align: center;
+    color: white;
+">
+    <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Poppins', sans-serif;">
+        Ready to Enjoy <span style="color: var(--accent);">Delicious Meals</span>?
+    </h2>
+    <p style="font-size: 1.2rem; margin-bottom: 2.5rem; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Join thousands of satisfied residents who enjoy fresh meals delivered to their rooms daily.
+    </p>
+    
+    {% if not user.is_authenticated %}
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'register' %}" class="btn" style="
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            background: var(--primary);
+            color: white;
+        ">
+            <i class="fas fa-user-plus"></i> Sign Up Now
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-outline" style="
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-color: white;
+            color: white;
+            background: transparent;
+        ">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </div>
+    {% else %}
+    <a href="{% url 'dashboard' %}" class="btn" style="
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        background: var(--primary);
+        color: white;
+    ">
+        <i class="fas fa-rocket"></i> Go to Your Dashboard
+    </a>
+    {% endif %}
+</section>
+
+<!-- Add hover effects via JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects to cards
+        const cards = document.querySelectorAll('.user-type-card, .feature-step, .stat-card, .testimonial');
+        
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'var(--box-shadow)';
+            });
+        });
+        
+        // Animate stats counting
+        const statNumbers = document.querySelectorAll('.stat-card h3');
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.textContent);
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                stat.textContent = Math.round(current) + (stat.textContent.includes('/') ? '/5' : '+');
+            }, 30);
+        });
+    });
+</script>
+
+<!-- Add CSS animations -->
+<style>
+    .hero-section {
+        animation: fadeIn 1s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .feature-step:nth-child(1) { animation-delay: 0.1s; }
+    .feature-step:nth-child(2) { animation-delay: 0.2s; }
+    .feature-step:nth-child(3) { animation-delay: 0.3s; }
+    
+    .user-type-card:nth-child(1) { animation-delay: 0.1s; }
+    .user-type-card:nth-child(2) { animation-delay: 0.2s; }
+    .user-type-card:nth-child(3) { animation-delay: 0.3s; }
+</style>
+{% endblock %}

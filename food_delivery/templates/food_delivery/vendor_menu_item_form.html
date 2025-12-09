@@ -1,0 +1,12 @@
+<!-- food_delivery/templates/food_delivery/vendor_menu_item_form.html -->
+{% extends 'food_delivery/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+    <h2>{{ title }}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button button-success">Save Item</button>
+        <a href="{% url 'vendor_menu_item_list' %}" class="button button-secondary">Cancel</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!-- food_delivery/templates/food_delivery/payment_page.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Complete Your Payment{% endblock %}
+
+{% block content %}
+    <h2>Complete Your Payment</h2>
+
+    <div class="dashboard-section">
+        <h4>Order Summary</h4>
+        <p><strong>Subscription Plan:</strong> {{ plan_name }}</p>
+        <p><strong>Amount to Pay:</strong> ₹{{ amount }}</p>
+    </div>
+
+    <form method="post" action="{% url 'process_payment' %}" id="payment-form">
+        {% csrf_token %}
+        
+        <!-- Payment Method Selection -->
+        <div id="payment-method-selector">
+            {{ form.payment_method }}
+        </div>
+
+        <!-- Card Details (Initially Shown) -->
+        <div id="card-details">
+            <p>{{ form.card_number.label_tag }} {{ form.card_number }}</p>
+            <p>{{ form.card_expiry.label_tag }} {{ form.card_expiry }}</p>
+            <p>{{ form.card_cvc.label_tag }} {{ form.card_cvc }}</p>
+        </div>
+
+        <!-- UPI Details (Initially Hidden) -->
+        <div id="upi-details" style="display: none;">
+            <p>{{ form.upi_id.label_tag }} {{ form.upi_id }}</p>
+        </div>
+        
+        <button type="submit" class="button button-success">Pay ₹{{ amount }} (Dummy)</button>
+    </form>
+
+    <script>
+        document.querySelectorAll('input[name="payment_method"]').forEach((elem) => {
+            elem.addEventListener("change", function(event) {
+                var method = event.target.value;
+                if (method === "card") {
+                    document.getElementById("card-details").style.display = "block";
+                    document.getElementById("upi-details").style.display = "none";
+                } else if (method === "upi") {
+                    document.getElementById("card-details").style.display = "none";
+                    document.getElementById("upi-details").style.display = "block";
+                }
+            });
+        });
+    </script>
+{% endblock %}

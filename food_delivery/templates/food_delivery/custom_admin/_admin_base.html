@@ -1,0 +1,30 @@
+<!-- food_delivery/templates/food_delivery/custom_admin/_admin_base.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block content %}
+<style>
+    .admin-wrapper { display: flex; }
+    .admin-sidebar { width: 220px; background-color: #343a40; color: white; padding: 15px; min-height: 70vh; }
+    .admin-sidebar a { display: block; color: #adb5bd; text-decoration: none; padding: 10px; border-radius: 4px; }
+    .admin-sidebar a:hover, .admin-sidebar a.active { background-color: #495057; color: white; }
+    .admin-main-content { flex-grow: 1; padding: 20px; }
+</style>
+
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <h4>Admin Menu</h4>
+        <nav>
+            <a href="{% url 'custom_admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'custom_admin_dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'admin_pending_daily_orders' %}" class="{% if 'daily-orders' in request.path %}active{% endif %}">Manage Orders</a>
+            <a href="{% url 'custom_admin_manage_plans' %}" class="{% if 'plans' in request.path %}active{% endif %}">Subscription Plans</a>
+            <a href="{% url 'custom_admin_manage_users' %}" class="{% if 'users' in request.path %}active{% endif %}">Manage Users</a>
+            <hr style="border-color: #495057;">
+            <a href="{% url 'admin:index' %}" target="_blank">Low-Level Admin</a>
+            <a href="{% url 'home' %}">Back to Main Site</a>
+        </nav>
+    </aside>
+    <main class="admin-main-content">
+        {% block admin_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,667 @@
+{% extends 'food_delivery/base.html' %}
+{% block title %}My Menu Items | FoodieExpress{% endblock %}
+{% block content %}
+<div class="menu-items-container" style="
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+">
+    <!-- Header Section -->
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(0,0,0,0.05);
+    ">
+        <div>
+            <h1 style="
+                font-size: 2.2rem;
+                color: var(--secondary);
+                margin-bottom: 0.5rem;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 700;
+            ">
+                My Menu Items
+            </h1>
+            <p style="color: var(--gray); font-size: 1rem;">
+                Manage your delicious offerings for customers
+            </p>
+        </div>
+        
+        <a href="{% url 'vendor_menu_item_create' %}" class="add-item-btn" style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 0.9rem 1.8rem;
+            background: linear-gradient(135deg, var(--success) 0%, #00E6B8 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 200, 150, 0.3);
+        "
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0, 200, 150, 0.4)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 200, 150, 0.3)';">
+            <i class="fas fa-plus-circle"></i>
+            Add New Item
+        </a>
+    </div>
+
+    {% if menu_items %}
+    <!-- Stats Bar -->
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    ">
+        <div style="
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05));
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        ">
+            <div style="
+                font-size: 2rem;
+                color: var(--primary);
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            ">
+                {{ menu_items|length }}
+            </div>
+            <div style="color: var(--secondary); font-weight: 600; font-size: 0.9rem;">
+                Total Items
+            </div>
+        </div>
+        
+        {% comment %} Optional: Add more stats if available in context {% endcomment %}
+        <div style="
+            background: linear-gradient(135deg, rgba(0, 200, 150, 0.1), rgba(0, 200, 150, 0.05));
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        ">
+            <div style="
+                font-size: 2rem;
+                color: var(--success);
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            ">
+                ₹{{ total_value|default:"0" }}
+            </div>
+            <div style="color: var(--secondary); font-weight: 600; font-size: 0.9rem;">
+                Total Value
+            </div>
+        </div>
+        
+        <div style="
+            background: linear-gradient(135deg, rgba(255, 209, 102, 0.1), rgba(255, 209, 102, 0.05));
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        ">
+            <div style="
+                font-size: 2rem;
+                color: var(--accent);
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            ">
+                {{ active_items|default:menu_items|length }}
+            </div>
+            <div style="color: var(--secondary); font-weight: 600; font-size: 0.9rem;">
+                Active Items
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items Grid -->
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    ">
+        {% for item in menu_items %}
+        <div class="menu-item-card" style="
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        ">
+            <!-- Top Gradient Border -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 5px;
+                background: linear-gradient(90deg, 
+                    {% if item.meal_type == 'breakfast' %}var(--accent)
+                    {% elif item.meal_type == 'lunch' %}var(--primary)
+                    {% elif item.meal_type == 'dinner' %}var(--secondary)
+                    {% else %}var(--info){% endif %} 0%, 
+                    {% if item.meal_type == 'breakfast' %}#FFE082
+                    {% elif item.meal_type == 'lunch' %}#FF8B5C
+                    {% elif item.meal_type == 'dinner' %}#3D4166
+                    {% else %}#2CC4E0{% endif %} 100%);
+            "></div>
+            
+            <!-- Item Header -->
+            <div style="padding: 1.5rem 1.5rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h3 style="
+                        color: var(--secondary);
+                        margin: 0;
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        line-height: 1.3;
+                    ">
+                        {{ item.name }}
+                    </h3>
+                    
+                    <span style="
+                        background: 
+                            {% if item.meal_type == 'breakfast' %}rgba(255, 209, 102, 0.1)
+                            {% elif item.meal_type == 'lunch' %}rgba(255, 107, 53, 0.1)
+                            {% elif item.meal_type == 'dinner' %}rgba(45, 48, 71, 0.1)
+                            {% else %}rgba(23, 162, 184, 0.1){% endif %};
+                        color: 
+                            {% if item.meal_type == 'breakfast' %}var(--accent)
+                            {% elif item.meal_type == 'lunch' %}var(--primary)
+                            {% elif item.meal_type == 'dinner' %}var(--secondary)
+                            {% else %}var(--info){% endif %};
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 50px;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        margin-left: 0.5rem;
+                    ">
+                        {{ item.get_meal_type_display }}
+                    </span>
+                </div>
+                
+                <!-- Price Tag -->
+                <div style="
+                    background: linear-gradient(135deg, var(--primary) 0%, #FF8B5C 100%);
+                    color: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 8px;
+                    display: inline-block;
+                    margin-bottom: 1rem;
+                ">
+                    <div style="display: flex; align-items: center; gap: 5px; font-weight: 700;">
+                        <i class="fas fa-tag"></i>
+                        <span>₹{{ item.price }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            <div style="padding: 0 1.5rem 1.5rem;">
+                {% if item.description %}
+                <div style="
+                    background: var(--light-gray);
+                    border-radius: 10px;
+                    padding: 1rem;
+                    margin-bottom: 1.5rem;
+                ">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
+                        <i class="fas fa-align-left" style="color: var(--gray); font-size: 0.9rem;"></i>
+                        <span style="font-weight: 600; color: var(--secondary); font-size: 0.9rem;">Description</span>
+                    </div>
+                    <p style="
+                        color: var(--gray);
+                        margin: 0;
+                        font-size: 0.95rem;
+                        line-height: 1.5;
+                    ">
+                        {{ item.description|truncatewords:30 }}
+                    </p>
+                </div>
+                {% endif %}
+                
+                <!-- Additional Info (if available) -->
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 0.75rem;
+                    margin-bottom: 1.5rem;
+                ">
+                    <div style="
+                        background: rgba(0, 200, 150, 0.05);
+                        border-radius: 8px;
+                        padding: 0.75rem;
+                        text-align: center;
+                    ">
+                        <div style="font-weight: 600; color: var(--success); font-size: 0.8rem;">
+                            <i class="fas fa-star"></i> Rating
+                        </div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--secondary);">
+                            {{ item.rating|default:"4.5" }}/5
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(255, 107, 53, 0.05);
+                        border-radius: 8px;
+                        padding: 0.75rem;
+                        text-align: center;
+                    ">
+                        <div style="font-weight: 600; color: var(--primary); font-size: 0.8rem;">
+                            <i class="fas fa-clock"></i> Prep Time
+                        </div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--secondary);">
+                            {{ item.preparation_time|default:"20" }} min
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{% url 'vendor_menu_item_update' item.pk %}" class="edit-btn" style="
+                        flex: 1;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        padding: 0.8rem;
+                        background: linear-gradient(135deg, var(--info) 0%, #2CC4E0 100%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 10px;
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                        transition: all 0.3s ease;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(23, 162, 184, 0.3)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <i class="fas fa-edit"></i>
+                        Edit Item
+                    </a>
+                    
+                    {% comment %} Optional: Add delete button if needed {% endcomment %}
+                    <button type="button" class="more-btn" style="
+                        width: 45px;
+                        background: var(--light-gray);
+                        border: none;
+                        border-radius: 10px;
+                        color: var(--gray);
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
+                    onmouseover="this.style.background='var(--primary)'; this.style.color='white';"
+                    onmouseout="this.style.background='var(--light-gray)'; this.style.color='var(--gray)';">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State (hidden when items exist) -->
+    {% else %}
+    <div style="
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin: 2rem 0;
+    ">
+        <div style="
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #f8f9fa 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            color: var(--gray);
+            font-size: 3rem;
+        ">
+            <i class="fas fa-utensils"></i>
+        </div>
+        
+        <h3 style="
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        ">
+            No Menu Items Yet
+        </h3>
+        
+        <p style="
+            color: var(--gray);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        ">
+            Start building your menu by adding delicious items that customers will love. 
+            Add breakfast, lunch, and dinner options to maximize your reach.
+        </p>
+        
+        <a href="{% url 'vendor_menu_item_create' %}" class="create-first-btn" style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #FF8B5C 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+        "
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(255, 107, 53, 0.4)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(255, 107, 53, 0.3)';">
+            <i class="fas fa-plus-circle"></i>
+            Create Your First Item
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Help Section -->
+    <div style="
+        margin-top: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(45, 48, 71, 0.05), rgba(45, 48, 71, 0.02));
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(0,0,0,0.05);
+    ">
+        <h3 style="
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        ">
+            <i class="fas fa-lightbulb" style="color: var(--accent);"></i>
+            Tips for Success
+        </h3>
+        
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        ">
+            <div style="
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                border-left: 4px solid var(--success);
+            ">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(0, 200, 150, 0.1);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--success);
+                    margin-bottom: 1rem;
+                ">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--secondary); font-size: 1.1rem;">
+                    Add High-Quality Photos
+                </h4>
+                <p style="margin: 0; color: var(--gray); font-size: 0.9rem; line-height: 1.5;">
+                    Items with photos receive 3x more orders. Use bright, clear images.
+                </p>
+            </div>
+            
+            <div style="
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                border-left: 4px solid var(--primary);
+            ">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(255, 107, 53, 0.1);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--primary);
+                    margin-bottom: 1rem;
+                ">
+                    <i class="fas fa-pen"></i>
+                </div>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--secondary); font-size: 1.1rem;">
+                    Detailed Descriptions
+                </h4>
+                <p style="margin: 0; color: var(--gray); font-size: 0.9rem; line-height: 1.5;">
+                    Describe ingredients, taste, and portion sizes to attract customers.
+                </p>
+            </div>
+            
+            <div style="
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                border-left: 4px solid var(--info);
+            ">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(23, 162, 184, 0.1);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--info);
+                    margin-bottom: 1rem;
+                ">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--secondary); font-size: 1.1rem;">
+                    Competitive Pricing
+                </h4>
+                <p style="margin: 0; color: var(--gray); font-size: 0.9rem; line-height: 1.5;">
+                    Research similar items and price competitively to maximize orders.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Menu Item Card Hover Effects */
+    .menu-item-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .menu-items-container {
+            padding: 1rem;
+        }
+        
+        .menu-items-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .menu-items-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .stats-bar {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        
+        .tips-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-bar {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .add-item-btn {
+            width: 100% !important;
+            justify-content: center;
+        }
+        
+        .menu-item-actions {
+            flex-direction: column !important;
+        }
+        
+        .menu-item-actions a {
+            width: 100% !important;
+        }
+    }
+    
+    /* Animation for cards */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .menu-item-card {
+        animation: fadeInUp 0.5s ease;
+    }
+    
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects to menu item cards
+        const menuCards = document.querySelectorAll('.menu-item-card');
+        menuCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+                this.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'var(--box-shadow)';
+            });
+        });
+        
+        // Add animation to stats numbers
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.textContent.replace('₹', ''));
+            if (!isNaN(target)) {
+                let current = 0;
+                const increment = target / 20;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    stat.textContent = stat.textContent.includes('₹') ? 
+                        '₹' + Math.round(current) : Math.round(current);
+                }, 50);
+            }
+        });
+        
+        // More options button functionality
+        document.querySelectorAll('.more-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Create dropdown menu
+                const dropdown = document.createElement('div');
+                dropdown.style.cssText = `
+                    position: absolute;
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                    padding: 0.5rem;
+                    z-index: 100;
+                    min-width: 150px;
+                    border: 1px solid rgba(0,0,0,0.05);
+                    transform: translateY(10px);
+                    opacity: 0;
+                    transition: all 0.3s ease;
+                `;
+                
+                dropdown.innerHTML = `
+                    <a href="#" style="display: block; padding: 0.75rem; color: var(--secondary); text-decoration: none; border-radius: 6px; transition: background 0.3s;"
+                       onmouseover="this.style.background='var(--light-gray)'"
+                       onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-eye" style="margin-right: 8px;"></i> View Details
+                    </a>
+                    <a href="#" style="display: block; padding: 0.75rem; color: var(--secondary); text-decoration: none; border-radius: 6px; transition: background 0.3s;"
+                       onmouseover="this.style.background='var(--light-gray)'"
+                       onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-chart-line" style="margin-right: 8px;"></i> View Stats
+                    </a>
+                    <div style="height: 1px; background: var(--light-gray); margin: 0.25rem 0;"></div>
+                    <a href="#" style="display: block; padding: 0.75rem; color: var(--danger); text-decoration: none; border-radius: 6px; transition: background 0.3s;"
+                       onmouseover="this.style.background='rgba(255, 77, 77, 0.1)'"
+                       onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-trash" style="margin-right: 8px;"></i> Delete Item
+                    </a>
+                `;
+                
+                // Position dropdown
+                const rect = this.getBoundingClientRect();
+                dropdown.style.left = rect.left - 130 + 'px';
+                dropdown.style.top = rect.bottom + 5 + 'px';
+                
+                // Add to body
+                document.body.appendChild(dropdown);
+                
+                // Animate in
+                setTimeout(() => {
+                    dropdown.style.opacity = '1';
+                    dropdown.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Close dropdown when clicking elsewhere
+                const closeDropdown = () => {
+                    dropdown.style.opacity = '0';
+                    dropdown.style.transform = 'translateY(10px)';
+                    setTimeout(() => dropdown.remove(), 300);
+                    document.removeEventListener('click', closeDropdown);
+                };
+                
+                setTimeout(() => {
+                    document.addEventListener('click', closeDropdown);
+                }, 10);
+            });
+        });
+    });
+</script>
+{% endblock %}

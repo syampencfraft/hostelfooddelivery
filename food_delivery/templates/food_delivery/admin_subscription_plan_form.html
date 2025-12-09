@@ -1,0 +1,33 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <div style="color: #666; font-size: 0.8rem; margin-top: 0.25rem;">
+                {{ field.help_text }}
+            </div>
+            {% endif %}
+            {% if field.errors %}
+            <div style="color: red; font-size: 0.9rem; margin-top: 0.25rem;">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="button button-success">Save Plan</button>
+        <a href="{% url 'admin_subscription_plans_list' %}" class="button">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- food_delivery/templates/food_delivery/vendor_manage_subscriptions.html -->
+{% extends 'food_delivery/base.html' %}
+{% block title %}Manage My Subscriptions{% endblock %}
+{% block content %}
+    <h2>Manage Subscription Plan Offerings</h2>
+    <p>Select the plans that you are able to provide meals for. The menu items you add can then be assigned to these plans.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button button-success">Save My Offerings</button>
+    </form>
+{% endblock %}

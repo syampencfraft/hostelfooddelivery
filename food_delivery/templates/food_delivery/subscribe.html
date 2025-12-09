@@ -1,0 +1,21 @@
+<!-- food_delivery/templates/food_delivery/subscribe.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Subscribe - {{ meal_plan.name }}{% endblock %}
+
+{% block content %}
+    <h2>Subscribe to {{ meal_plan.name }}</h2>
+    <div class="meal-plan-card">
+        <h3>{{ meal_plan.name }} ({{ meal_plan.get_meal_type_display|capfirst }})</h3>
+        <p>{{ meal_plan.description }}</p>
+        <p class="price">Price per day: ₹{{ meal_plan.price_per_day }}</p>
+        <p>Provided by: {{ meal_plan.vendor.username|default:"Admin" }}</p>
+    </div>
+
+    <h3>Choose Your Subscription Duration:</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button">Confirm & Pay (Mock Payment)</button>
+    </form>
+{% endblock %}

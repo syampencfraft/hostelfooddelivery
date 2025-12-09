@@ -1,0 +1,29 @@
+<!-- food_delivery/templates/food_delivery/subscription_plans.html -->
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Subscription Plans{% endblock %}
+
+{% block content %}
+    <h2>Available Subscription Plans</h2>
+    {% if plans %}
+        {% for plan in plans %}
+            <div class="dashboard-section">
+                <h3>{{ plan.name }}</h3>
+                <p>{{ plan.description }}</p>
+                <p><strong>Price:</strong> ₹{{ plan.base_price }} for {{ plan.duration_days }} days.</p>
+                <p><strong>Includes:</strong> 
+                    {% for mt in plan.meal_types_included.all %}
+                        {{ mt.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                {% if user.is_authenticated and user.user_type == 'resident' %}
+                    <a href="{% url 'subscribe_to_plan' plan.id %}" class="button">Subscribe Now</a>
+                {% elif not user.is_authenticated %}
+                    <a href="{% url 'login' %}" class="button">Login to Subscribe</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No subscription plans are available at the moment.</p>
+    {% endif %}
+{% endblock %}

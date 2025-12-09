@@ -1,0 +1,27 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Update Order Status{% endblock %}
+
+{% block content %}
+<h2>Update Order Status</h2>
+
+<div class="card">
+    <h3>Order #{{ order.id }}</h3>
+    <p>Customer: {{ order.user.username }}</p>
+    <p>Meal Type: {{ order.meal_type.name }}</p>
+    <p>Date: {{ order.order_date }}</p>
+    <p>Current Status: <strong>{{ order.get_status_display }}</strong></p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="{{ form.status.id_for_label }}">New Status:</label>
+        {{ form.status }}
+    </div>
+    
+    <button type="submit" class="button button-success">Update Status</button>
+    <a href="{% url 'dashboard' %}" class="button">Cancel</a>
+</form>
+{% endblock %}
