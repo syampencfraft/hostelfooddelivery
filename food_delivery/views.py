@@ -352,70 +352,84 @@ def vendor_menu_item_create(request):
     else:
         form = VendorMenuItemForm(vendor=request.user) # Pass vendor to the form
     return render(request, 'food_delivery/vendor_menu_item_form.html', {'form': form, 'title': 'Add New Menu Item'})
-
 @login_required
 @user_passes_test(is_vendor)
 def vendor_menu_item_update(request, pk):
-    menu_item = get_object_or_404(VendorMenuItem, pk=pk, vendor=request.user)
+    menu_item = get_object_or_404(
+        VendorMenuItem,
+        pk=pk,
+        vendor=request.user
+    )
+
     if request.method == 'POST':
-        form = VendorMenuItemForm(request.POST, request.FILES, instance=menu_item, vendor=request.user) # Pass vendor
+        form = VendorMenuItemForm(
+            request.POST,
+            request.FILES,
+            instance=menu_item,
+            vendor=request.user
+        )
+
         if form.is_valid():
-            form.save()
-            form.save_m2m() # Important for ManyToMany fields
-            messages.success(request, f'"{menu_item.name}" updated.')
+            form.save()  # ✔️ This already saves M2M
+            messages.success(request, f'"{menu_item.name}" updated successfully.')
             return redirect('vendor_menu_item_list')
+
     else:
-        form = VendorMenuItemForm(instance=menu_item, vendor=request.user) # Pass vendor
-    return render(request, 'food_delivery/vendor_menu_item_form.html', {'form': form, 'title': 'Edit Menu Item'})
+        form = VendorMenuItemForm(
+            instance=menu_item,
+            vendor=request.user
+        )
+
+    return render(
+        request,
+        'food_delivery/vendor_menu_item_form.html',
+        {
+            'form': form,
+            'title': 'Edit Menu Item'
+        }
+    )
 
 @login_required
 @user_passes_test(is_vendor)
-def vendor_daily_menu_create_update(request, menu_date_str=None, meal_type_id=None):
+def vendor_daily_menu_create_update(request):
 
-    menu_date = date.today()
-    if menu_date_str:
-        try:
-            menu_date = date.fromisoformat(menu_date_str)
-        except ValueError:
-            messages.error(request, "Invalid date format.")
-            return redirect('vendor_daily_menu_create_update')
+    if request.method == "POST":
+        form = DailyMenuForm(request.POST, vendor=request.user)
 
-    meal_type = None
-    if meal_type_id:
-        meal_type = get_object_or_404(MealType, id=meal_type_id)
-    
-
-    instance = None
-    if meal_type:
-        instance = DailyMenu.objects.filter(vendor=request.user, menu_date=menu_date, meal_type=meal_type).first()
-
-    if request.method == 'POST':
-        form = DailyMenuForm(request.POST, instance=instance, vendor=request.user)
         if form.is_valid():
-            daily_menu = form.save(commit=False)
-            daily_menu.vendor = request.user
-            if not instance: 
-                 daily_menu.meal_type = form.cleaned_data['meal_type'] 
-            daily_menu.save()
-            form.save_m2m() 
-            messages.success(request, f'Daily Menu for {daily_menu.meal_type.name} on {daily_menu.menu_date} updated.')
-            return redirect('dashboard')
-        else:
-            messages.error(request, 'Failed to update Daily Menu. Please correct errors.')
-    else:
-        initial_data = {'menu_date': menu_date}
-        if meal_type:
-            initial_data['meal_type'] = meal_type.id
-        form = DailyMenuForm(instance=instance, vendor=request.user, initial=initial_data)
+            vendor = request.user
+            menu_date = form.cleaned_data['menu_date']
+            meal_type = form.cleaned_data['meal_type']
+            available_items = form.cleaned_data['available_items']
 
-    context = {
+            # ✅ Create or update DailyMenu (WITHOUT ManyToMany)
+            daily_menu, created = DailyMenu.objects.update_or_create(
+                vendor=vendor,
+                menu_date=menu_date,
+                meal_type=meal_type,
+            )
+
+            # ✅ NOW handle ManyToMany field
+            daily_menu.available_items.set(available_items)
+
+            messages.success(
+                request,
+                "Daily menu created successfully."
+                if created else
+                "Daily menu updated successfully."
+            )
+            return redirect('dashboard')
+
+        else:
+            messages.error(request, "Please fix the errors below.")
+
+    else:
+        form = DailyMenuForm(vendor=request.user)
+
+    return render(request, 'food_delivery/vendor_daily_menu_form.html', {
         'form': form,
-        'title': 'Create/Update Daily Menu',
-        'menu_date': menu_date,
-        'meal_type': meal_type,
-        'all_meal_types': MealType.objects.all(),
-    }
-    return render(request, 'food_delivery/vendor_daily_menu_form.html', context)
+        'title': 'Create / Update Daily Menu'
+    })
 
 
 @login_required
@@ -590,26 +604,28 @@ def custom_admin_manage_plans(request):
         'plans': plans
     }
     return render(request, 'food_delivery/custom_admin/manage_plans.html', context)
-
 @login_required
-
 def custom_admin_plan_create(request):
     if request.method == 'POST':
         form = SubscriptionPlanForm(request.POST)
         if form.is_valid():
-            form.save()
+            plan = form.save(commit=False)
+            plan.save()
+            form.save_m2m()   # IMPORTANT
             messages.success(request, 'New subscription plan created successfully.')
             return redirect('custom_admin_manage_plans')
+        else:
+            print("FORM ERRORS:", form.errors)
     else:
         form = SubscriptionPlanForm()
-    context = {
+
+    return render(request, 'food_delivery/custom_admin/plan_form.html', {
         'form': form,
         'title': 'Create New Subscription Plan'
-    }
-    return render(request, 'food_delivery/custom_admin/plan_form.html', context)
+    })
+
 
 @login_required
-
 def custom_admin_plan_update(request, pk):
     plan = get_object_or_404(SubscriptionPlan, pk=pk)
     if request.method == 'POST':

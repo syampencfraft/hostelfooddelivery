@@ -163,20 +163,28 @@ class AdminAssignDeliveryAgentForm(forms.ModelForm):
         self.fields['delivery_agent'].queryset = CustomUser.objects.filter(user_type='delivery_agent')
         self.fields['delivery_agent'].empty_label = "Unassigned"
 
+        
 class SubscriptionPlanForm(forms.ModelForm):
     class Meta:
         model = SubscriptionPlan
-        fields = ['name', 'description', 'base_price', 'duration_days', 'meal_types_included', 'is_active']
+        fields = [
+            'name',
+            'description',
+            'base_price',
+            'duration_days',
+            'meal_types_included',
+            'is_active'
+        ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
-            'meal_types_included': forms.CheckboxSelectMultiple,
+            'meal_types_included': forms.CheckboxSelectMultiple(),  # IMPORTANT ()
         }
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            # Make meal_types_included more user-friendly
-            self.fields['meal_types_included'].queryset = MealType.objects.all()
-            self.fields['meal_types_included'].help_text = ''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['meal_types_included'].queryset = MealType.objects.all()
+        self.fields['meal_types_included'].help_text = ''
+
 
 class DummyPaymentForm(forms.Form):
     PAYMENT_CHOICES = [
