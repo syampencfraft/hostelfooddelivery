@@ -1,0 +1,44 @@
+{% extends 'food_delivery/base.html' %}
+{% block title %}My Deliveries{% endblock %}
+
+{% block content %}
+<h2>Assigned Deliveries</h2>
+
+{% if orders %}
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Resident</th>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.user.username }}</td>
+        <td>{{ order.order_date }}</td>
+        <td>{{ order.meal_type.name }}</td>
+        <td>{{ order.get_status_display }}</td>
+        <td>
+            {% if order.status == 'prepared' %}
+                <a href="{% url 'delivery_accept_order' order.id %}" class="btn btn-success">
+                    Accept
+                </a>
+                <a href="{% url 'delivery_reject_order' order.id %}" class="btn btn-danger">
+                    Reject
+                </a>
+
+            {% elif order.status == 'out_for_delivery' %}
+                <a href="{% url 'delivery_complete_order' order.id %}" class="btn btn-primary">
+                    Mark Delivered
+                </a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No assigned deliveries.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'food_delivery/base.html' %}
+{% block title %}Delivery History{% endblock %}
+
+{% block content %}
+<h2>Completed Deliveries</h2>
+
+{% if orders %}
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Resident</th>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Delivered Time</th>
+    </tr>
+
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.user.username }}</td>
+        <td>{{ order.order_date }}</td>
+        <td>{{ order.meal_type.name }}</td>
+        <td>{{ order.delivered_time }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No deliveries completed yet.</p>
+{% endif %}
+{% endblock %}

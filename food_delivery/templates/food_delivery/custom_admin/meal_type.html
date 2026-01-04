@@ -1,0 +1,84 @@
+{% extends 'food_delivery/base.html' %}
+{% block title %}Manage Meal Types{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">🍽️ Manage Meal Types</h3>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Add Meal Type -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    Add Meal Type
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Meal Type Name</label>
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                            {{ form.description.errors }}
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            Add Meal Type
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal Type List -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    Existing Meal Types
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for meal in meal_types %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ meal.name }}</td>
+                                    <td>{{ meal.description|default:"—" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">
+                                        No meal types added yet
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

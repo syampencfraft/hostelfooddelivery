@@ -214,6 +214,22 @@
             margin-bottom: 2rem;
         ">
             {% if user.user_type == 'resident' %}
+
+            {% for order in resident_orders %}
+    <p>
+        {{ order.meal_type.name }} - {{ order.order_date }}
+        <a href="{% url 'resident_live_tracking' order.id %}">
+            Track Delivery
+        </a>
+    </p>
+{% endfor %}
+
+
+<a href="{% url 'resident_delivery_history' %}" class="btn btn-secondary">
+    Delivery History
+</a>
+
+
                 <!-- Active Subscriptions Card -->
                 <div class="dashboard-card" style="
                     background: white;
@@ -845,9 +861,12 @@
                                         {% endif %}
                                     {% endfor %}
                                 </div>
+                                <a href="{% url 'vendor_orders_list' %}">
+    View Resident Orders
+</a>
                                 
                                 <!-- Action Button -->
-                                <a href="{% url 'vendor_update_daily_order_status' order.id %}" style="
+                                <a href="{% url 'vendor_update_order_status' order.id %}" style="
                                     display: inline-flex;
                                     align-items: center;
                                     justify-content: center;
@@ -1115,6 +1134,17 @@
                 </div>
 
             {% elif user.user_type == 'delivery_agent' %}
+            {% if user.user_type == 'delivery_agent' %}
+    <a href="{% url 'delivery_agent_orders' %}" class="btn btn-info">
+        My Deliveries
+    </a>
+<a href="{% url 'delivery_agent_history' %}" class="btn btn-secondary">
+    Delivery History
+</a>
+
+
+{% endif %}
+
                 <!-- Delivery Agent Dashboard Content -->
                 <!-- [Similar structure as above but for delivery agent] -->
                 <!-- Due to length constraints, I'm showing a condensed version -->

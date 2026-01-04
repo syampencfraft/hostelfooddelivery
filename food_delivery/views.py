@@ -142,11 +142,16 @@ def process_payment(request):
         return redirect('dashboard')
     
     return redirect('subscription_plans')
+from datetime import date
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import get_object_or_404, redirect, render
 
 @login_required
 @user_passes_test(is_resident)
 def resident_daily_order_select(request, meal_type_id=None, order_date_str=None):
 
+    # Active paid subscriptions
     user_subscriptions = UserSubscription.objects.filter(
         user=request.user,
         status='active',
@@ -159,6 +164,7 @@ def resident_daily_order_select(request, meal_type_id=None, order_date_str=None)
         messages.warning(request, "You don't have an active subscription to place an order.")
         return redirect('subscription_plans')
 
+    # Order date
     order_date = date.today()
     if order_date_str:
         try:
@@ -167,141 +173,104 @@ def resident_daily_order_select(request, meal_type_id=None, order_date_str=None)
             messages.error(request, "Invalid date format.")
             return redirect('resident_daily_order_select')
 
+    # Eligible meal types
+    eligible_meal_types_ids = {
+        mt.id
+        for sub in user_subscriptions
+        for mt in sub.plan.meal_types_included.all()
+    }
 
-    eligible_meal_types_ids = set()
-    for sub in user_subscriptions:
-        for mt in sub.plan.meal_types_included.all():
-            eligible_meal_types_ids.add(mt.id)
+    eligible_meal_types = MealType.objects.filter(
+        id__in=eligible_meal_types_ids
+    ).order_by('name')
 
-    eligible_meal_types = MealType.objects.filter(id__in=eligible_meal_types_ids).order_by('name')
-
-  
+    # Selected meal type
     selected_meal_type = None
     if meal_type_id:
         selected_meal_type = get_object_or_404(MealType, id=meal_type_id)
         if selected_meal_type.id not in eligible_meal_types_ids:
-            messages.error(request, f"You are not subscribed to {selected_meal_type.name} meals.")
+            messages.error(request, "You are not subscribed to this meal type.")
             return redirect('resident_daily_order_select')
     elif eligible_meal_types.exists():
-        selected_meal_type = eligible_meal_types.first() 
+        selected_meal_type = eligible_meal_types.first()
 
-    user_active_subscription = UserSubscription.objects.filter(
-        user=request.user,
-        status='active',
-        start_date__lte=date.today(),
-        end_date__gte=date.today()
-    ).first() # For simplicity, assume one active subscription. Real-world might need more logic.
-
-    if not user_active_subscription:
-        messages.warning(request, "You don't have an active subscription.")
-        return redirect('subscription_plans')
-    
+    # User active subscription (single)
+    user_active_subscription = user_subscriptions.first()
     current_plan = user_active_subscription.plan
 
     daily_menu = None
+    filtered_items = []
+
     if selected_meal_type:
-        # Find a daily menu from ANY vendor for this date and meal type
-        daily_menu_query = DailyMenu.objects.filter(
+        daily_menu = DailyMenu.objects.filter(
             menu_date=order_date,
             meal_type=selected_meal_type
-        ).prefetch_related('available_items__vendor', 'available_items__subscription_plans')
-        
-        daily_menu = daily_menu_query.first()
-        
+        ).prefetch_related(
+            'available_items__vendor',
+            'available_items__subscription_plans'
+        ).first()
+
         if daily_menu:
-            # ## CRUCIAL NEW LOGIC ##
-            # Filter the menu items to only show those valid for the user's current plan
-            original_items = daily_menu.available_items.all()
-            filtered_items = [item for item in original_items if current_plan in item.subscription_plans.all()]
-            
-            # We pass the filtered items to the form/template
-            # A bit of a hack: we modify the daily_menu object in memory for the template
-            daily_menu.filtered_available_items = filtered_items
+            filtered_items = [
+                item for item in daily_menu.available_items.all()
+                if current_plan in item.subscription_plans.all()
+            ]
 
-    daily_menu = None
-    if selected_meal_type:
-      
-        daily_menu_query = DailyMenu.objects.filter(
-            menu_date=order_date,
-            meal_type=selected_meal_type
-        ).prefetch_related('available_items__vendor')
-        
-        daily_menu = daily_menu_query.first() 
-
-    form = None
     existing_daily_order = None
+    form = None
+
     if daily_menu:
-  
         existing_daily_order = DailyOrder.objects.filter(
             user=request.user,
             order_date=order_date,
             meal_type=selected_meal_type
         ).first()
 
-        if existing_daily_order and existing_daily_order.status not in ['pending', 'submitted']:
-            messages.info(request, f"You have already placed and confirmed your {selected_meal_type.name} order for {order_date}. Status: {existing_daily_order.get_status_display()}.")
-            form = None 
-        else:
-            if request.method == 'POST':
-                form = DailyOrderSelectionForm(request.POST, daily_menu=daily_menu)
-                if form.is_valid():
-                
-                    covering_subscription = user_subscriptions.filter(
-                        plan__meal_types_included=selected_meal_type
-                    ).first() 
+        if request.method == 'POST' and filtered_items:
+            covering_subscription = user_subscriptions.filter(
+                plan__meal_types_included=selected_meal_type
+            ).first()
 
-                    if not covering_subscription:
-                        messages.error(request, "No active subscription covers this meal type.")
-                        return redirect('resident_daily_order_select', meal_type_id=meal_type_id, order_date_str=order_date_str)
+            if not covering_subscription:
+                messages.error(request, "No active subscription covers this meal.")
+                return redirect('resident_daily_order_select')
 
-                    if existing_daily_order:
-                        # Update existing order
-                        daily_order = existing_daily_order
-                        daily_order.status = 'submitted'
-                        daily_order.save()
-                        daily_order.items.all().delete() 
-                    else:
-                        # Create new daily order
-                        daily_order = DailyOrder.objects.create(
-                            user=request.user,
-                            user_subscription=covering_subscription,
-                            order_date=order_date,
-                            meal_type=selected_meal_type,
-                            status='submitted'
-                        )
-
-                    for item in daily_menu.available_items.all():
-                        quantity = form.cleaned_data.get(f'quantity_{item.id}', 0)
-                        price_at_order_time = form.cleaned_data.get(f'price_{item.id}', item.price)
-                        if quantity > 0:
-                            DailyOrderItem.objects.create(
-                                daily_order=daily_order,
-                                menu_item=item,
-                                quantity=quantity,
-                                price_at_order_time=price_at_order_time
-                            )
-                    messages.success(request, f"Your {selected_meal_type.name} order for {order_date} has been placed!")
-                    return redirect('dashboard')
-                else:
-                    messages.error(request, "Please correct the errors in your selection.")
+            if existing_daily_order:
+                daily_order = existing_daily_order
+                daily_order.items.all().delete()
             else:
-                initial_data = {}
-                if existing_daily_order:
-    
-                    for order_item in existing_daily_order.items.all():
-                        initial_data[f'quantity_{order_item.menu_item.id}'] = order_item.quantity
-                form = DailyOrderSelectionForm(daily_menu=daily_menu, initial=initial_data)
-    else:
-        messages.info(request, f"No menu available for {selected_meal_type.name} on {order_date}. Please check later or select another meal type.")
+                daily_order = DailyOrder.objects.create(
+                    user=request.user,
+                    user_subscription=covering_subscription,
+                    order_date=order_date,
+                    meal_type=selected_meal_type,
+                    status='submitted'
+                )
+
+            for item in filtered_items:
+                qty = int(request.POST.get(f'quantity_{item.id}', 0))
+                price = item.price
+                if qty > 0:
+                    DailyOrderItem.objects.create(
+                        daily_order=daily_order,
+                        menu_item=item,
+                        quantity=qty,
+                        price_at_order_time=price
+                    )
+
+            messages.success(request, "Your order has been placed successfully.")
+            return redirect('dashboard')
 
     context = {
         'order_date': order_date,
         'eligible_meal_types': eligible_meal_types,
         'selected_meal_type': selected_meal_type,
         'daily_menu': daily_menu,
-        'form': form,
-        'existing_daily_order': existing_daily_order
+        'filtered_items': filtered_items,
+        'existing_daily_order': existing_daily_order,
+        'user_active_subscription': user_active_subscription
     }
+
     return render(request, 'food_delivery/resident_daily_order_select.html', context)
 
 
@@ -337,21 +306,35 @@ def vendor_manage_subscriptions(request):
 
     return render(request, 'food_delivery/vendor_manage_subscriptions.html', {'form': form})
 
+
 @login_required
 @user_passes_test(is_vendor)
 def vendor_menu_item_create(request):
     if request.method == 'POST':
-        form = VendorMenuItemForm(request.POST, request.FILES, vendor=request.user) # Pass vendor to the form
+        form = VendorMenuItemForm(
+            request.POST,
+            request.FILES,
+            vendor=request.user
+        )
+
         if form.is_valid():
             menu_item = form.save(commit=False)
             menu_item.vendor = request.user
             menu_item.save()
-            form.save_m2m() # Important for ManyToMany fields
-            messages.success(request, f'"{menu_item.name}" added to your menu items.')
+            form.save_m2m()
+            messages.success(request, f'"{menu_item.name}" added successfully.')
             return redirect('vendor_menu_item_list')
+        else:
+            print(form.errors)  # 🔥 ADD THIS
+            messages.error(request, "Form is not valid. See errors below.")
     else:
-        form = VendorMenuItemForm(vendor=request.user) # Pass vendor to the form
-    return render(request, 'food_delivery/vendor_menu_item_form.html', {'form': form, 'title': 'Add New Menu Item'})
+        form = VendorMenuItemForm(vendor=request.user)
+
+    return render(request, 'food_delivery/vendor_menu_item_form.html', {
+        'form': form,
+        'title': 'Add New Menu Item'
+    })
+
 @login_required
 @user_passes_test(is_vendor)
 def vendor_menu_item_update(request, pk):
@@ -402,14 +385,13 @@ def vendor_daily_menu_create_update(request):
             meal_type = form.cleaned_data['meal_type']
             available_items = form.cleaned_data['available_items']
 
-            # ✅ Create or update DailyMenu (WITHOUT ManyToMany)
             daily_menu, created = DailyMenu.objects.update_or_create(
                 vendor=vendor,
                 menu_date=menu_date,
                 meal_type=meal_type,
+                defaults={}
             )
 
-            # ✅ NOW handle ManyToMany field
             daily_menu.available_items.set(available_items)
 
             messages.success(
@@ -420,49 +402,54 @@ def vendor_daily_menu_create_update(request):
             )
             return redirect('dashboard')
 
-        else:
-            messages.error(request, "Please fix the errors below.")
+        messages.error(request, "Please fix the errors below.")
 
     else:
         form = DailyMenuForm(vendor=request.user)
 
-    return render(request, 'food_delivery/vendor_daily_menu_form.html', {
-        'form': form,
-        'title': 'Create / Update Daily Menu'
-    })
+    return render(
+        request,
+        'food_delivery/vendor_daily_menu_form.html',
+        {
+            'form': form,
+            'title': 'Create / Update Daily Menu'
+        }
+    )
 
+from . forms import OrderStatusUpdateForm
 
 @login_required
 @user_passes_test(is_vendor)
-def vendor_update_daily_order_status(request, order_id):
-    order = get_object_or_404(DailyOrder, id=order_id)     
-    order_items_from_this_vendor = DailyOrderItem.objects.filter(
+def vendor_update_order_status(request, order_id):
+
+    # ✅ Fetch order with resident + meal
+    order = get_object_or_404(
+        DailyOrder.objects.select_related('user', 'meal_type'),
+        id=order_id
+    )
+
+    # ✅ ONLY items of this vendor
+    order_items = DailyOrderItem.objects.select_related(
+        'menu_item'
+    ).filter(
         daily_order=order,
         menu_item__vendor=request.user
-    ).exists()
-
-    if not order_items_from_this_vendor:
-        messages.error(request, "You are not authorized to update this order.")
-        return redirect('dashboard')
+    )
 
     if request.method == 'POST':
-        form = VendorUpdateDailyOrderStatusForm(request.POST, instance=order)
+        form = OrderStatusUpdateForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
-            messages.success(request, f"Daily Order {order.id} status updated to {order.get_status_display()}.")
+            messages.success(request, "Order status updated successfully.")
             return redirect('dashboard')
-        else:
-            messages.error(request, "Failed to update daily order status.")
     else:
-        form = VendorUpdateDailyOrderStatusForm(instance=order)
+        form = OrderStatusUpdateForm(instance=order)
 
-    context = {
+    return render(request, 'food_delivery/vendor_update_order_status.html', {
         'order': order,
-        'form': form,
-        'order_items': order.items.filter(menu_item__vendor=request.user),
-    }
-    return render(request, 'food_delivery/vendor_update_daily_order_status.html', context)
-
+        'order_items': order_items,
+        'form': form
+    })
 
 @login_required
 @user_passes_test(is_delivery_agent)
@@ -641,3 +628,157 @@ def custom_admin_plan_update(request, pk):
         'title': f'Edit Subscription Plan: {plan.name}'
     }
     return render(request, 'food_delivery/custom_admin/plan_form.html', context)
+
+
+
+
+from .forms import MealTypeForm
+
+def is_admin(user):
+    return user.user_type == 'admin'
+
+@login_required
+@user_passes_test(is_admin)
+def admin_meal_type_list_create(request):
+    meal_types = MealType.objects.all().order_by('name')
+
+    if request.method == 'POST':
+        form = MealTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Meal type added successfully.")
+            return redirect('admin_meal_type')
+    else:
+        form = MealTypeForm()
+
+    return render(request, 'food_delivery/custom_admin/meal_type.html', {
+        'form': form,
+        'meal_types': meal_types
+    })
+
+
+@login_required
+@user_passes_test(is_vendor)
+def vendor_orders_list(request):
+
+    orders = DailyOrder.objects.filter(
+        items__menu_item__vendor=request.user
+    ).select_related('user', 'meal_type').distinct()
+
+    return render(
+        request,
+        'food_delivery/vendor_orders_list.html',
+        {'orders': orders}
+    )
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_agent_orders(request):
+    orders = DailyOrder.objects.filter(
+        delivery_agent=request.user,
+        status__in=['out_for_delivery', 'prepared']
+    ).select_related('user', 'meal_type')
+
+    return render(
+        request,
+        'food_delivery/orders_list.html',
+        {'orders': orders}
+    )
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_accept_order(request, order_id):
+    order = get_object_or_404(
+        DailyOrder,
+        id=order_id,
+        delivery_agent=request.user
+    )
+
+    order.status = 'out_for_delivery'
+    order.assigned_time = timezone.now()
+    order.save()
+
+    messages.success(request, "Order accepted.")
+    return redirect('delivery_agent_orders')
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_reject_order(request, order_id):
+    order = get_object_or_404(
+        DailyOrder,
+        id=order_id,
+        delivery_agent=request.user
+    )
+
+    order.delivery_agent = None
+    order.status = 'prepared'
+    order.save()
+
+    messages.warning(request, "Order rejected.")
+    return redirect('delivery_agent_orders')
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_complete_order(request, order_id):
+    order = get_object_or_404(
+        DailyOrder,
+        id=order_id,
+        delivery_agent=request.user
+    )
+
+    order.status = 'delivered'
+    order.delivered_time = timezone.now()
+    order.save()
+
+    messages.success(request, "Delivery completed.")
+    return redirect('delivery_agent_orders')
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'resident')
+def resident_live_delivery_tracking(request, order_id):
+    order = get_object_or_404(
+        DailyOrder,
+        id=order_id,
+        user=request.user
+    )
+
+    return render(
+        request,
+        'food_delivery/resident/live_tracking.html',
+        {'order': order}
+    )
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'resident')
+def resident_delivery_history(request):
+    orders = DailyOrder.objects.filter(
+        user=request.user,
+        status='delivered'
+    ).order_by('-delivered_time')
+
+    return render(
+        request,
+        'food_delivery/delivery_history.html',
+        {'orders': orders}
+    )
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_agent_history(request):
+    orders = DailyOrder.objects.filter(
+        delivery_agent=request.user,
+        status='delivered'
+    ).order_by('-delivered_time')
+
+    return render(
+        request,
+        'food_delivery/delivery_history2.html',
+        {'orders': orders}
+    )

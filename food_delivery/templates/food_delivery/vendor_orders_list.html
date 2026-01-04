@@ -1,0 +1,32 @@
+{% extends 'food_delivery/base.html' %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h2>Resident Orders</h2>
+
+<table>
+    <tr>
+        <th>Resident</th>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.user.username }}</td>
+        <td>{{ order.order_date }}</td>
+        <td>{{ order.meal_type.name }}</td>
+        <td>{{ order.get_status_display }}</td>
+        <td>
+            <a href="{% url 'vendor_update_order_status' order.id %}">
+                Update Status
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No orders yet.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

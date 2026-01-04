@@ -43,21 +43,35 @@ class VendorSubscriptionForm(forms.Form):
     )
 
 class VendorMenuItemForm(forms.ModelForm):
-    # We must modify this form to only show plans the vendor has subscribed to.
+
+    subscription_plans = forms.ModelMultipleChoiceField(
+        queryset=SubscriptionPlan.objects.none(),
+        required=False,   # ✅ CRITICAL
+        widget=forms.CheckboxSelectMultiple
+    )
+
     class Meta:
         model = VendorMenuItem
-        fields = ['name', 'description', 'price', 'meal_type', 'subscription_plans', 'image', 'is_available_globally']
+        fields = [
+            'name',
+            'description',
+            'price',
+            'meal_type',
+            'subscription_plans',
+            'image',
+            'is_available_globally'
+        ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
-            'subscription_plans': forms.CheckboxSelectMultiple, # Make it user-friendly
         }
 
     def __init__(self, *args, **kwargs):
-        vendor = kwargs.pop('vendor', None) # Get the vendor from the view
+        vendor = kwargs.pop('vendor', None)
         super().__init__(*args, **kwargs)
+
+        self.fields['meal_type'].queryset = MealType.objects.all()
+
         if vendor:
-            # THIS IS THE KEY LOGIC:
-            # Only show subscription plans that this vendor has opted-in to serve.
             self.fields['subscription_plans'].queryset = SubscriptionPlan.objects.filter(
                 vendorsubscription__vendor=vendor,
                 vendorsubscription__is_active=True
@@ -91,6 +105,7 @@ class DailyMenuForm(forms.ModelForm):
 
 # --- 3. Resident Daily Order Selection Form ---
 # This form will be dynamically generated in the view based on DailyMenu items
+
 class DailyOrderSelectionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         daily_menu = kwargs.pop('daily_menu')
@@ -196,3 +211,34 @@ class DummyPaymentForm(forms.Form):
     card_expiry = forms.CharField(label="Expiry (MM/YY)", max_length=5, required=False)
     card_cvc = forms.CharField(label="CVC", max_length=3, required=False)
     upi_id = forms.CharField(label="UPI ID", max_length=50, required=False)
+
+
+# forms.py
+from django import forms
+from .models import MealType
+
+class MealTypeForm(forms.ModelForm):
+    class Meta:
+        model = MealType
+        fields = ['name', 'description']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter meal type (Breakfast, Lunch...)'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Optional description'
+            }),
+        }
+
+from django import forms
+from .models import DailyOrder
+
+
+
+class OrderStatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = DailyOrder
+        fields = ['status']

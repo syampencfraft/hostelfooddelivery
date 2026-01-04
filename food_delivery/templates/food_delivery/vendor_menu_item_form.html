@@ -1,12 +1,33 @@
-<!-- food_delivery/templates/food_delivery/vendor_menu_item_form.html -->
 {% extends 'food_delivery/base.html' %}
 {% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-    <h2>{{ title }}</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button button-success">Save Item</button>
-        <a href="{% url 'vendor_menu_item_list' %}" class="button button-secondary">Cancel</a>
-    </form>
+<h2>{{ title }}</h2>
+<a href="{% url 'vendor_manage_subscriptions' %}" class="btn btn-primary">
+    Manage My Subscription Plans
+</a>
+
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if form.errors %}
+        <div style="color:red;">
+            <strong>Please fix the errors below:</strong>
+            {{ form.errors }}
+        </div>
+    {% endif %}
+
+    {{ form.as_p }}
+
+    {% if not form.subscription_plans.field.queryset %}
+        <p style="color:red;">
+            ⚠ You have no active subscription plans.
+            You can still add menu items, but they won’t be linked to any plan.
+        </p>
+    {% endif %}
+
+    <button type="submit" class="button button-success">Save Item</button>
+    <a href="{% url 'vendor_menu_item_list' %}" class="button button-secondary">Cancel</a>
+</form>
 {% endblock %}

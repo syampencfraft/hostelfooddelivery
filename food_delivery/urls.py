@@ -20,8 +20,17 @@ urlpatterns = [
     path('vendor/menu-items/add/', views.vendor_menu_item_create, name='vendor_menu_item_create'),
     path('vendor/menu-items/<int:pk>/edit/', views.vendor_menu_item_update, name='vendor_menu_item_update'),
     path('vendor/daily-menu/', views.vendor_daily_menu_create_update, name='vendor_daily_menu_create_update'),
-    path('vendor/daily-menu/<str:menu_date_str>/<int:meal_type_id>/', views.vendor_daily_menu_create_update, name='vendor_daily_menu_create_update_specific'),
-    path('vendor/daily-order/<int:order_id>/update-status/', views.vendor_update_daily_order_status, name='vendor_update_daily_order_status'),
+    # path('vendor/daily-menu/<str:menu_date_str>/<int:meal_type_id>/', views.vendor_daily_menu_create_update, name='vendor_daily_menu_create_update_specific'),
+    path('vendor/orders/<int:order_id>/update/',
+    views.vendor_update_order_status,
+    name='vendor_update_order_status'),
+     path(
+        'vendor/orders/',
+        views.vendor_orders_list,
+        name='vendor_orders_list'
+    ),
+
+    # path('vendor/daily-order/<int:order_id>/update-status/', views.vendor_update_daily_order_status, name='vendor_update_daily_order_status'),
     path('vendor/my-subscriptions/', views.vendor_manage_subscriptions, name='vendor_manage_subscriptions'),
     path('vendor/menu-items/', views.vendor_menu_item_list, name='vendor_menu_item_list'),
 
@@ -44,4 +53,66 @@ urlpatterns = [
     path('subscribe/start/<int:plan_id>/', views.subscribe_to_plan_view, name='subscribe_to_plan'),
     path('payment/', views.payment_page, name='payment_page'),
     path('payment/process/', views.process_payment, name='process_payment'),
+
+
+
+
+path(
+    'site-admin/meal-types/',
+    views.admin_meal_type_list_create,
+    name='admin_meal_type'
+),
+
+
+
+    path(
+        'delivery/orders/',
+        views.delivery_agent_orders,
+        name='delivery_agent_orders'
+    ),
+
+    path(
+        'delivery/order/<int:order_id>/accept/',
+        views.delivery_accept_order,
+        name='delivery_accept_order'
+    ),
+
+    path(
+        'delivery/order/<int:order_id>/reject/',
+        views.delivery_reject_order,
+        name='delivery_reject_order'
+    ),
+
+    path(
+        'delivery/order/<int:order_id>/complete/',
+        views.delivery_complete_order,
+        name='delivery_complete_order'
+    ),
+
+
+
+path(
+    'resident/order/<int:order_id>/track/',
+    views.resident_live_delivery_tracking,
+    name='resident_live_tracking'
+),
+
+path(
+    'resident/delivery-history/',
+    views.resident_delivery_history,
+    name='resident_delivery_history'
+),
+
+path(
+    'delivery/history/',
+    views.delivery_agent_history,
+    name='delivery_agent_history'
+),
+path(
+    'resident/order/<int:order_id>/track/',
+    views.resident_live_delivery_tracking,
+    name='resident_live_tracking'
+),
+
+
 ]

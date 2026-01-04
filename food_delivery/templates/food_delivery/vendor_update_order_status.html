@@ -1,19 +1,38 @@
-<!-- food_delivery/templates/food_delivery/vendor_update_order_status.html -->
 {% extends 'food_delivery/base.html' %}
-
-{% block title %}Update Order Status - {{ order.id }}{% endblock %}
+{% block title %}Update Order Status{% endblock %}
 
 {% block content %}
-    <h2>Update Order Status for Order #{{ order.id }}</h2>
-    <p><strong>Meal:</strong> {{ order.meal_plan.name }}</p>
-    <p><strong>For:</strong> {{ order.user.username }}</p>
-    <p><strong>Date:</strong> {{ order.order_date }}</p>
-    <p><strong>Current Status:</strong> {{ order.get_status_display|capfirst }}</p>
+<h2>Update Status for Order #{{ order.id }}</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button">Update Status</button>
-        <a href="{% url 'dashboard' %}" class="button" style="background-color: #6c757d;">Cancel</a>
-    </form>
+<p><strong>Resident:</strong> {{ order.user.username }}</p>
+
+<p>
+    <strong>Date:</strong>
+    {{ order.order_date }}
+    ({{ order.meal_type.name }})
+</p>
+
+<p><strong>Items:</strong></p>
+<ul>
+    {% for item in order_items %}
+        <li>
+            {{ item.quantity }} × {{ item.menu_item.name }}
+        </li>
+    {% empty %}
+        <li>No items from you in this order.</li>
+    {% endfor %}
+</ul>
+
+<p>
+    <strong>Current Status:</strong>
+    {{ order.get_status_display }}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="button button-success">
+        Update Status
+    </button>
+</form>
 {% endblock %}

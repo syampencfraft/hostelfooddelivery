@@ -19,8 +19,14 @@
             <a href="{% url 'custom_admin_manage_plans' %}" class="{% if 'plans' in request.path %}active{% endif %}">Subscription Plans</a>
             <a href="{% url 'custom_admin_manage_users' %}" class="{% if 'users' in request.path %}active{% endif %}">Manage Users</a>
             <hr style="border-color: #495057;">
-            <a href="{% url 'admin:index' %}" target="_blank">Low-Level Admin</a>
+            {% comment %} <a href="{% url '{% url 'admin_meal_type' %}' %}" target="_blank">Meal Type</a> {% endcomment %}
             <a href="{% url 'home' %}">Back to Main Site</a>
+
+            <li class="nav-item">
+    <a class="nav-link" href="{% url 'admin_meal_type' %}">
+        Meal Types
+    </a>
+</li>
         </nav>
     </aside>
     <main class="admin-main-content">

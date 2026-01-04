@@ -1,41 +1,58 @@
-<!-- food_delivery/templates/food_delivery/resident_daily_order_select.html -->
 {% extends 'food_delivery/base.html' %}
 
 {% block title %}Daily Meal Selection{% endblock %}
 
 {% block content %}
-    <h2>Daily Meal Selection for {{ order_date }}</h2>
+<h2>Daily Meal Selection for {{ order_date }}</h2>
 
-    <div>
-        <strong>Select Meal Type:</strong>
-        {% for mt in eligible_meal_types %}
-            <a href="{% url 'resident_daily_order_select_with_date_meal' mt.id order_date|date:'Y-m-d' %}" 
-               class="button {% if selected_meal_type.id == mt.id %}button-success{% else %}button-secondary{% endif %}">
-                {{ mt.name }}
-            </a>
+<div>
+    <strong>Select Meal Type:</strong>
+    {% for mt in eligible_meal_types %}
+        <a href="{% url 'resident_daily_order_select_with_date_meal' mt.id order_date|date:'Y-m-d' %}"
+           class="button {% if selected_meal_type and selected_meal_type.id == mt.id %}button-success{% else %}button-secondary{% endif %}">
+            {{ mt.name }}
+        </a>
+    {% endfor %}
+</div>
+
+<hr>
+
+{% if daily_menu and filtered_items %}
+    <h3>
+        {{ selected_meal_type.name }} Menu
+        ({{ user_active_subscription.plan.name }})
+    </h3>
+
+    <p><strong>Vendor:</strong> {{ daily_menu.vendor.username }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for item in filtered_items %}
+            <div style="margin-bottom: 10px;">
+                <label>
+                    {{ item.name }} – ₹{{ item.price }}
+                </label>
+                <input type="number"
+                       name="quantity_{{ item.id }}"
+                       min="0"
+                       max="10"
+                       value="0"
+                       class="quantity-input">
+            </div>
         {% endfor %}
-    </div>
+        <button type="submit" class="button button-success">
+            Place My Order
+        </button>
+    </form>
 
-    <hr>
+{% elif daily_menu %}
+    <p>
+        No items available for your subscription plan
+        ({{ user_active_subscription.plan.name }})
+        for {{ selected_meal_type.name }} today.
+    </p>
+{% else %}
+    <p>No menu available for the selected date and meal type.</p>
+{% endif %}
 
-    {% if daily_menu and daily_menu.filtered_available_items %}
-        <h3>Menu for {{ selected_meal_type.name }} ({{ user_active_subscription.plan.name }})</h3>
-        <p>Provided by: {{ daily_menu.vendor.username }}</p>
-        
-        <form method="post">
-            {% csrf_token %}
-            <!-- This is a simplified way to render. A better way is to adapt the form to only show these fields. -->
-            {% for item in daily_menu.filtered_available_items %}
-                <p>
-                    <label for="id_quantity_{{ item.id }}">{{ item.name }} (₹{{ item.price }})</label>
-                    <input type="number" name="quantity_{{ item.id }}" value="0" min="0" max="10" class="quantity-input" id="id_quantity_{{ item.id }}">
-                    <input type="hidden" name="price_{{ item.id }}" value="{{ item.price }}">
-                </p>
-            {% endfor %}
-            <button type="submit" class="button button-success">Place My Order</button>
-        </form>
-
-    {% elif daily_menu %}
-        <p>Sorry, no items are available for your subscription plan ({{ user_active_subscription.plan.name }}) in today's {{ selected_meal_type.name }} menu.</p>
-    {% endif %}
 {% endblock %}
