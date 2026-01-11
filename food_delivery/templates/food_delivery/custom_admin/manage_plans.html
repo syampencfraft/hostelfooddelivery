@@ -1,67 +1,222 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Manage Subscription Plans</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-4">
+{% extends 'food_delivery/custom_admin/_admin_base.html' %}
 
-    <h2 class="mb-4">Subscription Plans</h2>
+{% block title %}Subscription Plans | Admin{% endblock %}
 
-    <!-- Add Plan Button -->
-    <a href="{% url 'custom_admin_plan_create' %}" class="btn btn-success mb-3">
-        + Add New Plan
-    </a>
+{% block admin_content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
 
-    <!-- Messages -->
+    .page-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: var(--secondary);
+        font-size: 1.5rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .plan-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .plan-header {
+        background: linear-gradient(135deg, var(--secondary) 0%, #1a1c2b 100%);
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+    }
+
+    .plan-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-top: 0.5rem;
+    }
+
+    .plan-duration {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .plan-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+
+    .meal-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .meal-tag {
+        background: var(--light-gray);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--secondary);
+    }
+
+    .plan-status-active {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 200, 150, 0.2);
+        color: #00ffbf;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        backdrop-filter: blur(5px);
+    }
+
+    .plan-status-inactive {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 77, 77, 0.2);
+        color: #ff9999;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        backdrop-filter: blur(5px);
+    }
+
+    .plan-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--light-gray);
+        background: #f8f9fa;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .add-plan-card {
+        border: 2px dashed #ddd;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        min-height: 300px;
+        box-shadow: none;
+    }
+
+    .add-plan-card:hover {
+        border-color: var(--primary);
+        background: rgba(255, 107, 53, 0.05);
+        transform: translateY(-5px);
+    }
+
+    .add-content {
+        text-align: center;
+        color: var(--gray);
+    }
+
+    .add-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-file-invoice-dollar text-primary"></i> Subscription Plans
+        </h2>
+        <a href="{% url 'custom_admin_plan_create' %}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus-circle"></i> Create New Plan
+        </a>
+    </div>
+
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} mb-4">
+        {{ message }}
+    </div>
+    {% endfor %}
     {% endif %}
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Duration (Days)</th>
-                <th>Meal Types</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="plans-grid">
         {% for plan in plans %}
-            <tr>
-                <td>{{ plan.name }}</td>
-                <td>₹{{ plan.base_price }}</td>
-                <td>{{ plan.duration_days }}</td>
-                <td>
+        <div class="plan-card">
+            <div class="plan-header">
+                {% if plan.is_active %}
+                <span class="plan-status-active">Active</span>
+                {% else %}
+                <span class="plan-status-inactive">Inactive</span>
+                {% endif %}
+                <h4 class="mb-0">{{ plan.name }}</h4>
+                <div class="plan-price">₹{{ plan.base_price }}</div>
+                <div class="plan-duration">{{ plan.duration_days }} Days Validity</div>
+            </div>
+            <div class="plan-body">
+                <h6 class="text-muted mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Includes</h6>
+                <div class="meal-tags">
                     {% for meal in plan.meal_types_included.all %}
-                        <span class="badge bg-primary">{{ meal.name }}</span>
+                    <span class="meal-tag">
+                        <i class="fas fa-utensils me-1 text-primary" style="font-size: 0.7rem;"></i>{{ meal.name }}
+                    </span>
+                    {% empty %}
+                    <span class="text-muted small">No specific meals listed</span>
                     {% endfor %}
-                </td>
-                <td>
-                    {% if plan.is_active %}
-                        <span class="badge bg-success">Active</span>
-                    {% else %}
-                        <span class="badge bg-danger">Inactive</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'custom_admin_plan_update' plan.id %}" class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No subscription plans available</td>
-            </tr>
+                </div>
+                {% if plan.description %}
+                <p class="text-muted mt-3 small mb-0">{{ plan.description|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+            <div class="plan-footer">
+                <a href="{% url 'custom_admin_plan_update' plan.id %}" class="btn btn-sm btn-outline-secondary w-100">
+                    <i class="fas fa-edit me-1"></i> Edit Plan
+                </a>
+            </div>
+        </div>
         {% endfor %}
-        </tbody>
-    </table>
 
-</body>
-</html>
+        <!-- 'Add New' styled as a card as well for consistency -->
+        <a href="{% url 'custom_admin_plan_create' %}" class="text-decoration-none">
+            <div class="plan-card add-plan-card">
+                <div class="add-content">
+                    <div class="add-icon"><i class="fas fa-plus"></i></div>
+                    <h5>Add New Plan</h5>
+                    <p class="small mb-0">Create a new subscription package</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

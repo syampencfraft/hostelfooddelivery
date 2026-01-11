@@ -1,0 +1,65 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Manage Wardens | Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Wardens</h2>
+    <a href="{% url 'custom_admin_dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Approved?</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for warden in wardens %}
+            <tr>
+                <td>{{ warden.username }}</td>
+                <td>
+                    {% if warden.is_approved %}
+                    <span class="badge bg-success">Yes</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if warden.is_active %}
+                    <span class="badge bg-primary">Active</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ warden.id }}">
+
+                        {% if not warden.is_approved %}
+                        <button type="submit" name="action" value="approve"
+                            class="btn btn-sm btn-success">Approve</button>
+                        {% endif %}
+
+                        {% if warden.is_active %}
+                        <button type="submit" name="action" value="deactivate"
+                            class="btn btn-sm btn-warning">Deactivate</button>
+                        {% else %}
+                        <button type="submit" name="action" value="activate"
+                            class="btn btn-sm btn-info">Activate</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No wardens found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

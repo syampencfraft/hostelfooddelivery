@@ -3,30 +3,61 @@
 
 {% block content %}
 <style>
-    .admin-wrapper { display: flex; }
-    .admin-sidebar { width: 220px; background-color: #343a40; color: white; padding: 15px; min-height: 70vh; }
-    .admin-sidebar a { display: block; color: #adb5bd; text-decoration: none; padding: 10px; border-radius: 4px; }
-    .admin-sidebar a:hover, .admin-sidebar a.active { background-color: #495057; color: white; }
-    .admin-main-content { flex-grow: 1; padding: 20px; }
+    .admin-wrapper {
+        display: flex;
+    }
+
+    .admin-sidebar {
+        width: 220px;
+        background-color: #343a40;
+        color: white;
+        padding: 15px;
+        min-height: 70vh;
+    }
+
+    .admin-sidebar a {
+        display: block;
+        color: #adb5bd;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .admin-sidebar a:hover,
+    .admin-sidebar a.active {
+        background-color: #495057;
+        color: white;
+    }
+
+    .admin-main-content {
+        flex-grow: 1;
+        padding: 20px;
+    }
 </style>
 
 <div class="admin-wrapper">
     <aside class="admin-sidebar">
         <h4>Admin Menu</h4>
         <nav>
-            <a href="{% url 'custom_admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'custom_admin_dashboard' %}active{% endif %}">Dashboard</a>
-            <a href="{% url 'admin_pending_daily_orders' %}" class="{% if 'daily-orders' in request.path %}active{% endif %}">Manage Orders</a>
-            <a href="{% url 'custom_admin_manage_plans' %}" class="{% if 'plans' in request.path %}active{% endif %}">Subscription Plans</a>
-            <a href="{% url 'custom_admin_manage_users' %}" class="{% if 'users' in request.path %}active{% endif %}">Manage Users</a>
+            <a href="{% url 'custom_admin_dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'custom_admin_dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'admin_pending_daily_orders' %}"
+                class="{% if 'daily-orders' in request.path %}active{% endif %}">Manage Orders</a>
+            <a href="{% url 'custom_admin_manage_plans' %}"
+                class="{% if 'plans' in request.path %}active{% endif %}">Subscription Plans</a>
+            <a href="{% url 'custom_admin_manage_users' %}"
+                class="{% if 'users' in request.path %}active{% endif %}">Manage Users</a>
+            <a href="{% url 'custom_admin_manage_wardens' %}"
+                class="{% if 'wardens' in request.path %}active{% endif %}">Manage Wardens</a>
             <hr style="border-color: #495057;">
-            {% comment %} <a href="{% url '{% url 'admin_meal_type' %}' %}" target="_blank">Meal Type</a> {% endcomment %}
+
             <a href="{% url 'home' %}">Back to Main Site</a>
 
             <li class="nav-item">
-    <a class="nav-link" href="{% url 'admin_meal_type' %}">
-        Meal Types
-    </a>
-</li>
+                <a class="nav-link" href="{% url 'admin_meal_type' %}">
+                    Meal Types
+                </a>
+            </li>
         </nav>
     </aside>
     <main class="admin-main-content">

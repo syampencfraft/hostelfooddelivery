@@ -2,8 +2,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from datetime import date, timedelta
-from .models import CustomUser, SubscriptionPlan, UserSubscription, \
-                    VendorMenuItem, DailyMenu, DailyOrder, DailyOrderItem, MealType
+from .models import (CustomUser, SubscriptionPlan, UserSubscription, 
+                     VendorMenuItem, DailyMenu, DailyOrder, DailyOrderItem, MealType, BulkOrder)
 
 # --- User Authentication Forms (No Changes) ---
 class CustomUserCreationForm(UserCreationForm):
@@ -213,10 +213,6 @@ class DummyPaymentForm(forms.Form):
     upi_id = forms.CharField(label="UPI ID", max_length=50, required=False)
 
 
-# forms.py
-from django import forms
-from .models import MealType
-
 class MealTypeForm(forms.ModelForm):
     class Meta:
         model = MealType
@@ -233,12 +229,23 @@ class MealTypeForm(forms.ModelForm):
             }),
         }
 
-from django import forms
-from .models import DailyOrder
-
-
-
 class OrderStatusUpdateForm(forms.ModelForm):
     class Meta:
         model = DailyOrder
         fields = ['status']
+
+
+class BulkOrderForm(forms.ModelForm):
+    # Form for Wardens to place bulk orders
+    class Meta:
+        model = BulkOrder
+        fields = ['meal_type', 'order_date', 'special_requirements']
+        widgets = {
+            'order_date': forms.DateInput(attrs={'type': 'date'}),
+            'special_requirements': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['meal_type'].queryset = MealType.objects.all()
+

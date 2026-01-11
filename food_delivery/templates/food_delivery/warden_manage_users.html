@@ -1,0 +1,285 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Manage Residents | FoodieExpress{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .page-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: var(--secondary);
+        font-size: 1.5rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .user-avatar-small {
+        width: 40px;
+        height: 40px;
+        background: var(--light-gray);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .user-info-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-details h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--secondary);
+    }
+
+    .user-details span {
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+
+    /* Custom Table Styling (Shared) */
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.8rem;
+    }
+
+    .custom-table th {
+        color: var(--gray);
+        font-weight: 600;
+        padding: 1rem;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--light-gray);
+    }
+
+    .custom-table td {
+        background: var(--light-gray);
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        transition: transform 0.2s ease;
+    }
+
+    .custom-table tr:hover td {
+        transform: scale(1.005);
+        background: #f1f3f5;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-table tr td:first-child {
+        border-radius: 10px 0 0 10px;
+        border-left: 4px solid transparent;
+    }
+
+    .custom-table tr td:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .custom-table tr.pending td:first-child {
+        border-left-color: var(--warning);
+    }
+
+    .custom-table tr.active-user td:first-child {
+        border-left-color: var(--success);
+    }
+
+    .custom-table tr.inactive-user td:first-child {
+        border-left-color: var(--danger);
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-approved {
+        background: rgba(0, 200, 150, 0.1);
+        color: var(--success);
+    }
+
+    .badge-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #856404;
+    }
+
+    .badge-active {
+        background: rgba(23, 162, 184, 0.1);
+        color: var(--info);
+    }
+
+    .badge-inactive {
+        background: rgba(255, 77, 77, 0.1);
+        color: var(--danger);
+    }
+
+    .action-btn-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-approve {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-deactivate {
+        background: var(--warning);
+        color: #333;
+    }
+
+    .btn-activate {
+        background: var(--info);
+        color: white;
+    }
+
+    .btn-icon:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+</style>
+
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-users-cog text-primary"></i> Manage Residents
+    </h2>
+    <a href="{% url 'warden_dashboard' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Resident</th>
+                    <th>Approval Status</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr
+                    class="{% if not user.is_approved %}pending{% elif user.is_active %}active-user{% else %}inactive-user{% endif %}">
+                    <td>
+                        <div class="user-info-cell">
+                            <div class="user-avatar-small">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <div class="user-details">
+                                <h5>{{ user.username }}</h5>
+                                <span>{{ user.email|default:"No email provided" }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if user.is_approved %}
+                        <span class="status-badge badge-approved"><i class="fas fa-check"></i> Approved</span>
+                        {% else %}
+                        <span class="status-badge badge-pending"><i class="fas fa-clock"></i> Pending Approval</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                        <span class="status-badge badge-active">Active</span>
+                        {% else %}
+                        <span class="status-badge badge-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" style="display:inline;" class="action-btn-group">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+
+                            {% if not user.is_approved %}
+                            <button type="submit" name="action" value="approve" class="btn-icon btn-approve"
+                                title="Approve">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            {% endif %}
+
+                            {% if user.is_active %}
+                            <button type="submit" name="action" value="deactivate" class="btn-icon btn-deactivate"
+                                title="Deactivate">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                            {% else %}
+                            <button type="submit" name="action" value="activate" class="btn-icon btn-activate"
+                                title="Activate">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-user-slash fa-3x mb-3"></i>
+                            <p>No residents found matching criteria.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

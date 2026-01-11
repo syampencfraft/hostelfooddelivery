@@ -9,10 +9,12 @@ class CustomUser(AbstractUser):
         ("resident", "Resident"),
         ("vendor", "Vendor"),
         ("delivery_agent", "Delivery Agent"),
+        ("warden", "Warden"),
     )
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default="resident")
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
+    is_approved = models.BooleanField(default=False, help_text="Designates whether this user has been approved by an admin or warden.")
 
     def __str__(self):
         return self.username
@@ -167,3 +169,47 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment of {self.amount} by {self.user.username}"
+
+
+class BulkOrder(models.Model):
+    ORDER_STATUS_CHOICES = (
+        ("pending", "Pending"),
+        ("submitted", "Submitted"),
+        ("prepared", "Prepared"),
+        ("out_for_delivery", "Out for Delivery"),
+        ("delivered", "Delivered"),
+        ("cancelled", "Cancelled"),
+    )
+    warden = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'user_type': 'warden'}, related_name='bulk_orders')
+    order_date = models.DateField(default=date.today)
+    meal_type = models.ForeignKey(MealType, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default="submitted")
+    delivery_agent = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+                                       limit_choices_to={'user_type': 'delivery_agent'},
+                                       related_name='assigned_bulk_orders')
+    assigned_time = models.DateTimeField(null=True, blank=True)
+    delivered_time = models.DateTimeField(null=True, blank=True)
+    ordered_at = models.DateTimeField(auto_now_add=True)
+    
+    # Bulk order specifics
+    special_requirements = models.TextField(blank=True, help_text="Any special instructions for the bulk order")
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        ordering = ['-order_date', 'meal_type']
+
+    def __str__(self):
+        return f"Bulk Order by {self.warden.username} for {self.meal_type.name} on {self.order_date}"
+    
+class BulkOrderItem(models.Model):
+    bulk_order = models.ForeignKey(BulkOrder, on_delete=models.CASCADE, related_name='items')
+    menu_item = models.ForeignKey(VendorMenuItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price_at_order_time = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        unique_together = ('bulk_order', 'menu_item')
+
+    def __str__(self):
+        return f"{self.quantity} x {self.menu_item.name} for Bulk Order {self.bulk_order.id}"
+

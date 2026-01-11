@@ -1,74 +1,193 @@
-{% extends 'food_delivery/base.html' %}
+{% extends 'food_delivery/custom_admin/_admin_base.html' %}
 
-{% block title %}Pending Orders - Admin{% endblock %}
+{% block title %}Pending Orders | Admin{% endblock %}
 
-{% block content %}
-<div class="container">
+{% block admin_content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .page-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: var(--secondary);
+        font-size: 1.5rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-header {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: var(--secondary);
+        font-size: 1.1rem;
+    }
+
+    .order-body {
+        padding: 1.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        color: var(--dark);
+    }
+
+    .info-icon {
+        width: 30px;
+        color: var(--primary);
+        text-align: center;
+        margin-right: 10px;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--gray);
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-weight: 500;
+        display: block;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge.status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.status-prepared {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-badge.status-out_for_delivery {
+        background: #e8d4f7;
+        color: #4a1b6d;
+    }
+
+    .action-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+        background: white;
+    }
+</style>
+
+<div class="container-fluid">
     <div class="page-header">
-        <h1><i class="fas fa-clock"></i> Pending Orders</h1>
-        <p class="subtitle">Manage and assign delivery agents for pending orders</p>
+        <h2 class="page-title">
+            <i class="fas fa-shipping-fast text-primary"></i> Pending Orders
+        </h2>
+        <span class="badge bg-secondary">{{ pending_orders.count }} Orders</span>
     </div>
 
     {% if pending_orders %}
-    <div class="orders-container">
+    <div class="orders-grid">
         {% for order in pending_orders %}
-        <div class="order-card card-{{ order.status }}">
+        <div class="order-card">
             <div class="order-header">
                 <div class="order-id">
-                    <i class="fas fa-receipt"></i>
-                    Order #{{ order.id }}
+                    <i class="fas fa-receipt text-muted me-2"></i>#{{ order.id }}
                 </div>
-                <div class="order-status">
-                    <span class="status-badge status-{{ order.status }}">
-                        {{ order.get_status_display }}
-                    </span>
+                <span class="status-badge status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+
+            <div class="order-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-user"></i></div>
+                            <div>
+                                <span class="info-label">Customer</span>
+                                <span class="info-value">{{ order.user.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-calendar-day"></i></div>
+                            <div>
+                                <span class="info-label">Date</span>
+                                <span class="info-value">{{ order.order_date|date:"M d" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-row mb-3">
+                    <div class="info-icon"><i class="fas fa-utensils"></i></div>
+                    <div>
+                        <span class="info-label">Meal Type</span>
+                        <span class="info-value">{{ order.meal_type.name }}</span>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon"><i class="fas fa-motorcycle"></i></div>
+                    <div>
+                        <span class="info-label">Current Agent</span>
+                        {% if order.delivery_agent %}
+                        <span class="info-value text-success">{{ order.delivery_agent.username }}</span>
+                        {% else %}
+                        <span class="info-value text-danger">Unassigned</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            
-            <div class="order-details">
-                <div class="detail-row">
-                    <i class="fas fa-utensils"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Meal Type</span>
-                        <span class="detail-value">{{ order.meal_type.name }}</span>
-                    </div>
-                </div>
-                
-                <div class="detail-row">
-                    <i class="fas fa-user"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Customer</span>
-                        <span class="detail-value">{{ order.user.username }}</span>
-                    </div>
-                </div>
-                
-                <div class="detail-row">
-                    <i class="fas fa-calendar-day"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Order Date</span>
-                        <span class="detail-value">{{ order.order_date }}</span>
-                    </div>
-                </div>
-                
-                <div class="detail-row">
-                    <i class="fas fa-truck"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Delivery Agent</span>
-                        <span class="detail-value {% if not order.delivery_agent %}unassigned{% endif %}">
-                            {% if order.delivery_agent %}
-                                {{ order.delivery_agent.username }}
-                            {% else %}
-                                Not assigned
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="order-actions">
-                <a href="{% url 'admin_assign_delivery_agent_to_daily_order' order.id %}" 
-                   class="btn btn-primary">
-                    <i class="fas fa-user-tag"></i>
+
+            <div class="action-footer">
+                <a href="{% url 'admin_assign_delivery_agent_to_daily_order' order.id %}" class="btn btn-primary w-100">
+                    <i class="fas fa-user-plus me-2"></i>
                     {% if order.delivery_agent %}Change Agent{% else %}Assign Agent{% endif %}
                 </a>
             </div>
@@ -76,326 +195,11 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">
-        <div class="empty-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <h3>No Pending Orders</h3>
-        <p>All orders have been processed for now.</p>
+    <div class="text-center py-5 bg-white rounded shadow-sm">
+        <img src="https://img.icons8.com/clouds/200/000000/checked-truck.png" alt="All clear" class="mb-3">
+        <h3 class="text-muted">All Caught Up!</h3>
+        <p class="text-secondary">There are no pending orders requiring assignment right now.</p>
     </div>
     {% endif %}
-    
-    <div class="page-footer">
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
 </div>
-
-<style>
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.page-header {
-    margin-bottom: 40px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.page-header h1 {
-    color: #2c3e50;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.page-header .subtitle {
-    color: #7f8c8d;
-    margin-top: 5px;
-    font-size: 1.1rem;
-}
-
-.orders-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
-}
-
-.order-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e8e8e8;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.order-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-}
-
-.order-card.card-submitted {
-    border-top: 4px solid #ff9800;
-}
-
-.order-card.card-prepared {
-    border-top: 4px solid #2196f3;
-}
-
-.order-card.card-out_for_delivery {
-    border-top: 4px solid #9c27b0;
-}
-
-.order-header {
-    padding: 20px;
-    background: #fafafa;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.order-id {
-    font-weight: 600;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.1rem;
-}
-
-.order-id i {
-    color: #ff9800;
-}
-
-.status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-submitted {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
-}
-
-.status-prepared {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-}
-
-.status-out_for_delivery {
-    background-color: #e8d4f7;
-    color: #4a1b6d;
-    border: 1px solid #d9b8ff;
-}
-
-.order-details {
-    padding: 25px;
-}
-
-.detail-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.detail-row:last-child {
-    margin-bottom: 0;
-}
-
-.detail-row i {
-    color: #3498db;
-    width: 20px;
-    text-align: center;
-    padding-top: 2px;
-}
-
-.detail-content {
-    flex: 1;
-}
-
-.detail-label {
-    display: block;
-    font-size: 0.85rem;
-    color: #7f8c8d;
-    margin-bottom: 4px;
-    font-weight: 500;
-}
-
-.detail-value {
-    display: block;
-    color: #2c3e50;
-    font-weight: 500;
-}
-
-.detail-value.unassigned {
-    color: #e74c3c;
-    font-style: italic;
-}
-
-.order-actions {
-    padding: 0 25px 25px;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
-    width: 100%;
-}
-
-.btn-primary:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-}
-
-.btn-secondary {
-    background: #95a5a6;
-    color: white;
-    padding: 10px 25px;
-}
-
-.btn-secondary:hover {
-    background: #7f8c8d;
-    transform: translateY(-2px);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    margin: 40px 0;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    color: #2ecc71;
-    margin-bottom: 20px;
-}
-
-.empty-state h3 {
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-.empty-state p {
-    color: #7f8c8d;
-    font-size: 1.1rem;
-}
-
-.page-footer {
-    padding-top: 30px;
-    border-top: 2px solid #f0f0f0;
-    display: flex;
-    justify-content: center;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-    
-    .orders-container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .order-id {
-        font-size: 1rem;
-    }
-    
-    .detail-row {
-        margin-bottom: 15px;
-    }
-    
-    .order-details,
-    .order-actions {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .page-header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .btn {
-        padding: 10px 15px;
-        font-size: 0.9rem;
-    }
-}
-</style>
-
-<!-- Add Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add subtle animation to cards when they appear
-    const cards = document.querySelectorAll('.order-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
-    
-    // Add click animation to buttons
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('mousedown', function() {
-            this.style.transform = 'scale(0.98)';
-        });
-        
-        button.addEventListener('mouseup', function() {
-            this.style.transform = '';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-});
-</script>
 {% endblock %}

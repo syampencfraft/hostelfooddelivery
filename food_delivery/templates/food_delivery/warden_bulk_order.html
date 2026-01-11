@@ -1,0 +1,177 @@
+{% extends 'food_delivery/base.html' %}
+
+{% block title %}Place Bulk Order | FoodieExpress{% endblock %}
+
+{% block content %}
+<style>
+    .order-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 3rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: var(--secondary);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        color: var(--gray);
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--secondary);
+        margin-bottom: 0.8rem;
+        display: block;
+    }
+
+    .form-control-lg {
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+    }
+
+    .info-box {
+        background: rgba(23, 162, 184, 0.1);
+        border-left: 4px solid var(--info);
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        color: #0c5460;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+
+    .info-box i {
+        margin-right: 8px;
+    }
+</style>
+
+<div class="order-container">
+    <div class="mb-4">
+        <a href="{% url 'warden_dashboard' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="form-card">
+        <div class="form-header">
+            <div class="icon-circle mb-3">
+                <i class="fas fa-utensils fa-3x text-primary"></i>
+            </div>
+            <h2 class="form-title">Bulk Food Order</h2>
+            <p class="form-subtitle">Form for events, gatherings, or special hostel requirements</p>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>Note:</strong> Bulk orders require admin/vendor confirmation. Please place orders at least 24 hours
+            in advance.
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.meal_type.id_for_label }}">
+                            <i class="fas fa-clock text-primary me-2"></i> Meal Type
+                        </label>
+                        {{ form.meal_type.errors }}
+                        <!-- Assuming the form renders a select widget, we can add class via widget tweaks or wrap it -->
+                        <div class="input-group">
+                            {{ form.meal_type }}
+                        </div>
+                        <small class="text-muted mt-1">Select Breakfast, Lunch, or Dinner</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.order_date.id_for_label }}">
+                            <i class="far fa-calendar-alt text-primary me-2"></i> Date Required
+                        </label>
+                        {{ form.order_date.errors }}
+                        {{ form.order_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <label for="{{ form.special_requirements.id_for_label }}">
+                    <i class="fas fa-clipboard-list text-primary me-2"></i> Menu & Requirements
+                </label>
+                {{ form.special_requirements.errors }}
+                {{ form.special_requirements }}
+                <small class="text-muted mt-1 d-block">
+                    Please describe the menu items, quantity (number of people), and any dietary restrictions in detail.
+                </small>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-submit shadow-sm">
+                    Place Bulk Order <i class="fas fa-paper-plane ms-2"></i>
+                </button>
+                <a href="{% url 'warden_dashboard' %}" class="btn btn-secondary btn-block">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Add Bootstrap/Custom classes to Django form fields via JS for quick styling
+    // Alternatively, this can be done in forms.py with widget attrs
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('btn')) {
+                input.classList.add('form-control');
+                if (input.tagName === 'TEXTAREA') {
+                    input.rows = 4;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

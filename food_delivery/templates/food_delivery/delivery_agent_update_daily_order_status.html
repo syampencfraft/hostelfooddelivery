@@ -1,27 +1,160 @@
 {% extends 'food_delivery/base.html' %}
 
-{% block title %}Update Delivery Status{% endblock %}
+{% block title %}Update Status | FoodieExpress{% endblock %}
 
 {% block content %}
-<h2>Update Delivery Status</h2>
+<style>
+    .update-status-container {
+        max-width: 600px;
+        margin: 2rem auto;
+    }
 
-<div class="card">
-    <h3>Order #{{ order.id }}</h3>
-    <p>Customer: {{ order.user.username }}</p>
-    <p>Meal Type: {{ order.meal_type.name }}</p>
-    <p>Date: {{ order.order_date }}</p>
-    <p>Current Status: <strong>{{ order.get_status_display }}</strong></p>
+    .order-info-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .card-header-bg {
+        background: linear-gradient(135deg, var(--secondary) 0%, #1a1c2b 100%);
+        padding: 1.5rem;
+        color: white;
+        text-align: center;
+    }
+
+    .order-id {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem;
+    }
+
+    .info-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95rem;
+    }
+
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: var(--secondary);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .status-highlight {
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 2rem;
+    }
+
+    .btn-update {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="update-status-container">
+    <div class="mb-3">
+        <a href="{% url 'delivery_agent_orders' %}" class="btn btn-outline btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Deliveries
+        </a>
+    </div>
+
+    <!-- Order Details -->
+    <div class="order-info-card">
+        <div class="card-header-bg">
+            <div class="order-id">
+                <i class="fas fa-box"></i> Order #{{ order.id }}
+            </div>
+            <div style="opacity: 0.9;">Update Tracking Information</div>
+        </div>
+        <div class="card-body">
+            <ul class="info-list">
+                <li>
+                    <span class="info-label"><i class="fas fa-user-circle me-2"></i>Customer</span>
+                    <span class="info-value">{{ order.user.username }}</span>
+                </li>
+                <li>
+                    <span class="info-label"><i class="fas fa-utensils me-2"></i>Meal Type</span>
+                    <span class="info-value">{{ order.meal_type.name }}</span>
+                </li>
+                <li>
+                    <span class="info-label"><i class="far fa-calendar-alt me-2"></i>Date</span>
+                    <span class="info-value">{{ order.order_date }}</span>
+                </li>
+                <li>
+                    <span class="info-label"><i class="fas fa-info-circle me-2"></i>Current Status</span>
+                    <span class="info-value status-highlight">{{ order.get_status_display }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Update Form -->
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group mb-4">
+                <label class="form-label">
+                    <i class="fas fa-exchange-alt text-primary me-2"></i> New Status
+                </label>
+                <!-- Add form-control styling to the select widget if not already there -->
+                <div class="input-group">
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-update shadow-sm">
+                <i class="fas fa-save me-2"></i> Update Status
+            </button>
+            <a href="{% url 'delivery_agent_orders' %}" class="btn btn-secondary btn-update">
+                Cancel
+            </a>
+        </form>
+    </div>
 </div>
 
-<form method="post">
-    {% csrf_token %}
-    
-    <div class="form-group">
-        <label for="{{ form.status.id_for_label }}">New Status:</label>
-        {{ form.status }}
-    </div>
-    
-    <button type="submit" class="button button-success">Update Status</button>
-    <a href="{% url 'dashboard' %}" class="button">Cancel</a>
-</form>
+<script>
+    // Ensure select dropdowns are styled
+    document.addEventListener('DOMContentLoaded', function () {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.classList.add('form-control');
+            select.classList.add('form-select'); // Bootstrap specific
+        });
+    });
+</script>
 {% endblock %}

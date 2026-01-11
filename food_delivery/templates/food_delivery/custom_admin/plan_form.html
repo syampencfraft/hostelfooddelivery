@@ -1,45 +1,138 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ title }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+{% extends 'food_delivery/custom_admin/_admin_base.html' %}
 
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">{{ title }}</h4>
-        </div>
+{% block title %}{{ title }} | Admin{% endblock %}
 
-        <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
+{% block admin_content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
 
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label class="form-label">{{ field.label }}</label>
-                        {{ field }}
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-header-bg {
+        background: linear-gradient(135deg, var(--secondary) 0%, #1a1c2b 100%);
+        padding: 2rem;
+        color: white;
+        text-align: center;
+    }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    /* Override standard bootstrap/django rendering if needed */
+    .form-label {
+        font-weight: 600;
+        color: var(--secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.15);
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--gray);
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="mb-3">
+        <a href="{% url 'custom_admin_manage_plans' %}" class="btn btn-outline btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Plans
+        </a>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header-bg">
+                <i class="fas fa-file-signature mb-3" style="font-size: 2.5rem; opacity: 0.8;"></i>
+                <h2 class="mb-0">{{ title }}</h2>
+                <p class="mb-0 opacity-75 mt-2">Configure subscription plan details below</p>
+            </div>
+
+            <div class="form-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}
+                        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                        </label>
+
+                        {% if field.name == 'meal_types_included' %}
+                        <div class="card p-3 bg-light border-0">
+                            {{ field }}
+                        </div>
+                        {% else %}
+                        <!-- Add form-control class if not present (handled by JS in base or manual addition) -->
+                        <div class="input-group">
+                            {{ field }}
+                        </div>
+                        {% endif %}
+
+                        {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text }}</div>
+                        {% endif %}
+
                         {% if field.errors %}
-                            <div class="text-danger">
-                                {{ field.errors }}
-                            </div>
+                        <div class="text-danger mt-1 small">
+                            {% for error in field.errors %}
+                            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <div class="text-end">
-                    <button type="submit" class="btn btn-success">
-                        Save Plan
-                    </button>
-                    <a href="{% url 'custom_admin_manage_plans' %}" class="btn btn-secondary">
-                        Cancel
-                    </a>
-                </div>
-            </form>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5 pt-3 border-top">
+                        <a href="{% url 'custom_admin_manage_plans' %}" class="btn btn-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="fas fa-save me-2"></i> Save Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-</body>
-</html>
+<script>
+    // Helper to ensure form controls get styled
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control') && !input.classList.contains('btn')) {
+                input.classList.add('form-control');
+            }
+        });
+
+        // Style checkboxes specifically if needed
+        const checks = document.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(check => {
+            check.classList.add('form-check-input');
+            // Wrap in div if not already suitable
+        });
+    });
+</script>
+{% endblock %}

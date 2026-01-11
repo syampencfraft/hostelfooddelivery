@@ -1,29 +1,248 @@
-<!-- food_delivery/templates/food_delivery/subscription_plans.html -->
 {% extends 'food_delivery/base.html' %}
 
-{% block title %}Subscription Plans{% endblock %}
+{% block title %}Subscription Plans | FoodieExpress{% endblock %}
 
 {% block content %}
-    <h2>Available Subscription Plans</h2>
-    {% if plans %}
-        {% for plan in plans %}
-            <div class="dashboard-section">
-                <h3>{{ plan.name }}</h3>
-                <p>{{ plan.description }}</p>
-                <p><strong>Price:</strong> ₹{{ plan.base_price }} for {{ plan.duration_days }} days.</p>
-                <p><strong>Includes:</strong> 
-                    {% for mt in plan.meal_types_included.all %}
-                        {{ mt.name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-                {% if user.is_authenticated and user.user_type == 'resident' %}
-                    <a href="{% url 'subscribe_to_plan' plan.id %}" class="button">Subscribe Now</a>
-                {% elif not user.is_authenticated %}
-                    <a href="{% url 'login' %}" class="button">Login to Subscribe</a>
-                {% endif %}
+<style>
+    .plans-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        padding: 2rem 0;
+    }
+
+    .plans-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        color: var(--secondary);
+        margin-bottom: 1rem;
+    }
+
+    .plans-subtitle {
+        color: var(--gray);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .pricing-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .plan-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .plan-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .plan-card:hover::before {
+        opacity: 1;
+    }
+
+    .plan-header {
+        padding: 2.5rem 2rem 1rem;
+        text-align: center;
+    }
+
+    .plan-name {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .plan-price {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        margin: 1.5rem 0;
+    }
+
+    .plan-price sub {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--gray);
+        bottom: 0;
+    }
+
+    .plan-duration {
+        display: inline-block;
+        background: var(--light-gray);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--secondary);
+    }
+
+    .plan-features {
+        padding: 1.5rem 2rem;
+        flex-grow: 1;
+        background: #fdfdfd;
+        border-top: 1px solid var(--light-gray);
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .feature-list li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        color: var(--dark);
+        font-size: 0.95rem;
+    }
+
+    .feature-list li i {
+        color: var(--success);
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
+
+    .plan-description {
+        text-align: center;
+        color: var(--gray);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    .plan-footer {
+        padding: 2rem;
+        text-align: center;
+        background: white;
+    }
+
+    .btn-subscribe {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .recommended-badge {
+        position: absolute;
+        top: 20px;
+        right: -35px;
+        background: var(--accent);
+        color: var(--secondary);
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-size: 0.8rem;
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+</style>
+
+<div class="plans-header">
+    <h1 class="plans-title">Choose Your Perfect Meal Plan</h1>
+    <p class="plans-subtitle">Flexible subscription options designed to fit your schedule and appetite. Fresh, healthy
+        meals delivered daily.</p>
+</div>
+
+{% if plans %}
+<div class="pricing-container">
+    {% for plan in plans %}
+    <div class="plan-card">
+        <!-- Placeholder logic for a 'recommended' badge if needed -->
+        {% if forloop.counter == 2 %}
+        <div class="recommended-badge">POPULAR</div>
+        {% endif %}
+
+        <div class="plan-header">
+            <h3 class="plan-name">{{ plan.name }}</h3>
+            <div class="plan-duration">{{ plan.duration_days }} Days Validity</div>
+            <div class="plan-price">
+                ₹{{ plan.base_price }}
+                <sub>/ pack</sub>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No subscription plans are available at the moment.</p>
-    {% endif %}
+            {% if plan.description %}
+            <p class="plan-description">{{ plan.description }}</p>
+            {% endif %}
+        </div>
+
+        <div class="plan-features">
+            <ul class="feature-list">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Detailed Daily Menu</span>
+                </li>
+                <!-- Extract meal types -->
+                {% for meal in plan.meal_types_included.all %}
+                <li>
+                    <i class="fas fa-utensils"></i>
+                    <span>Includes <strong>{{ meal.name }}</strong></span>
+                </li>
+                {% endfor %}
+                <li>
+                    <i class="fas fa-truck"></i>
+                    <span>Free Delivery</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="plan-footer">
+            {% if user.is_authenticated %}
+            {% if user.user_type == 'resident' %}
+            <a href="{% url 'subscribe_to_plan' plan.id %}" class="btn btn-primary btn-subscribe">
+                Subscribe Now
+            </a>
+            {% else %}
+            <button class="btn btn-secondary btn-subscribe" disabled title="Only residents can subscribe">
+                Residents Only
+            </button>
+            {% endif %}
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline btn-subscribe">
+                Login to Subscribe
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <img src="https://img.icons8.com/clouds/200/000000/cook.png" alt="Cooking" class="mb-4 opacity-75">
+    <h3 class="text-muted">New Plans Cooking Soon!</h3>
+    <p class="text-secondary">We are currently updating our subscription packages. Please check back later.</p>
+</div>
+{% endif %}
+
 {% endblock %}

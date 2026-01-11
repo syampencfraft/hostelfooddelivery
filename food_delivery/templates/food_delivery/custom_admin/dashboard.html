@@ -1,30 +1,312 @@
-<!-- food_delivery/templates/food_delivery/custom_admin/dashboard.html -->
 {% extends 'food_delivery/custom_admin/_admin_base.html' %}
 
+{% block title %}Admin Dashboard | FoodieExpress{% endblock %}
+
 {% block admin_content %}
-    <h2>Admin Dashboard</h2>
-    <p>Welcome, {{ user.username }}. Here is a summary of the system activity.</p>
-    
-    <div class="dashboard-section">
-        <h3>Live Stats</h3>
-        <ul>
-            <li>Active Subscriptions: <strong>{{ total_active_subscriptions }}</strong></li>
-            <li>Pending Orders Today: <strong>{{ pending_daily_orders_today }}</strong></li>
-            <li>Total Vendors: <strong>{{ vendors_count }}</strong></li>
-            <li>Total Delivery Agents: <strong>{{ delivery_agents_count }}</strong></li>
-        </ul>
+<style>
+    .admin-banner {
+        background: linear-gradient(135deg, #1a1c2b 0%, var(--secondary) 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+    }
+
+    .admin-banner::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .banner-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        box-shadow: var(--box-shadow);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .stat-info h5 {
+        color: var(--gray);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+
+    .stat-info .value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--secondary);
+    }
+
+    .quick-action-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quick-action-card:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+    }
+
+    .action-icon-circle {
+        width: 60px;
+        height: 60px;
+        background: var(--light-gray);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+    }
+
+    .quick-action-card:hover .action-icon-circle {
+        background: var(--primary);
+        color: white;
+    }
+
+    .quick-action-card h4 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--secondary);
+    }
+
+    .recent-activity {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--light-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: var(--secondary);
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Welcome Banner -->
+    <div class="admin-banner">
+        <h1 class="banner-title">Dashboard Overview</h1>
+        <p class="mb-0 opacity-75">Welcome back, {{ user.username }}! Here's what's happening today.</p>
     </div>
 
-    <div class="dashboard-section">
-        <h3>Recent Orders</h3>
-        {% if recent_orders %}
-            <ul>
-            {% for order in recent_orders %}
-                <li>Order #{{ order.id }} by {{ order.user.username }} on {{ order.order_date }} - Status: {{ order.get_status_display }}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No recent orders.</p>
-        {% endif %}
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(255, 107, 53, 0.1); color: var(--primary);">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Active Subscriptions</h5>
+                    <div class="value">{{ total_active_subscriptions }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(255, 193, 7, 0.1); color: var(--warning);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Pending Orders Today</h5>
+                    <div class="value">{{ pending_daily_orders_today }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(23, 162, 184, 0.1); color: var(--info);">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Total Vendors</h5>
+                    <div class="value">{{ vendors_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(0, 200, 150, 0.1); color: var(--success);">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Delivery Agents</h5>
+                    <div class="value">{{ delivery_agents_count }}</div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-lg-8 mb-4">
+            <div class="recent-activity h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="m-0 text-secondary"><i class="fas fa-history text-primary me-2"></i>Recent Orders</h4>
+                    <a href="{% url 'admin_pending_daily_orders' %}" class="btn btn-sm btn-outline">View All</a>
+                </div>
+
+                {% if recent_orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>User</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="activity-icon"
+                                            style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                            {{ order.user.username|first|upper }}
+                                        </div>
+                                        {{ order.user.username }}
+                                    </div>
+                                </td>
+                                <td class="text-muted">{{ order.order_date }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <img src="https://img.icons8.com/clouds/100/000000/empty-box.png" alt="No Data">
+                    <p class="text-muted mt-2">No recent orders found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="h-100">
+                <h4 class="mb-3 text-secondary">Quick Actions</h4>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="{% url 'custom_admin_manage_users' %}" class="text-decoration-none">
+                            <div class="quick-action-card">
+                                <div class="action-icon-circle">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <h4>Users</h4>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'custom_admin_manage_wardens' %}" class="text-decoration-none">
+                            <div class="quick-action-card">
+                                <div class="action-icon-circle">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h4>Wardens</h4>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'custom_admin_manage_plans' %}" class="text-decoration-none">
+                            <div class="quick-action-card">
+                                <div class="action-icon-circle">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <h4>Plans</h4>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'admin_meal_type' %}" class="text-decoration-none">
+                            <div class="quick-action-card">
+                                <div class="action-icon-circle">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <h4>Meals</h4>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

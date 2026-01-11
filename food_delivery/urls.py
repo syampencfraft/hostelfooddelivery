@@ -15,6 +15,11 @@ urlpatterns = [
     path('order/daily/', views.resident_daily_order_select, name='resident_daily_order_select'),
     path('order/daily/<int:meal_type_id>/<str:order_date_str>/', views.resident_daily_order_select, name='resident_daily_order_select_with_date_meal'),
 
+    # Warden URLs
+    path('warden/dashboard/', views.warden_dashboard, name='warden_dashboard'),
+    path('warden/users/', views.warden_manage_users, name='warden_manage_users'),
+    path('warden/bulk-order/', views.warden_bulk_order, name='warden_bulk_order'),
+
     # Vendor URLs
     path('vendor/menu-items/', views.vendor_menu_item_list, name='vendor_menu_item_list'),
     path('vendor/menu-items/add/', views.vendor_menu_item_create, name='vendor_menu_item_create'),
@@ -42,6 +47,7 @@ urlpatterns = [
     path('admin-daily-order/<int:order_id>/assign-agent/', views.admin_assign_delivery_agent_to_daily_order, name='admin_assign_delivery_agent_to_daily_order'),
     path('site-admin/dashboard/', views.custom_admin_dashboard, name='custom_admin_dashboard'),
     path('site-admin/users/', views.custom_admin_manage_users, name='custom_admin_manage_users'),
+    path('site-admin/wardens/', views.custom_admin_manage_wardens, name='custom_admin_manage_wardens'),
     path('site-admin/plans/', views.custom_admin_manage_plans, name='custom_admin_manage_plans'),
     path('site-admin/plans/create/', views.custom_admin_plan_create, name='custom_admin_plan_create'),
     path('site-admin/plans/<int:pk>/update/', views.custom_admin_plan_update, name='custom_admin_plan_update'),

@@ -6,11 +6,13 @@ from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib.auth import authenticate, login, logout
 from .models import CustomUser, MealType, SubscriptionPlan, UserSubscription, \
-                    VendorMenuItem, DailyMenu, DailyOrder, DailyOrderItem, Payment, VendorSubscription
+                    VendorMenuItem, DailyMenu, DailyOrder, DailyOrderItem, Payment, VendorSubscription, \
+                    BulkOrder, BulkOrderItem
 
 from .forms import CustomUserCreationForm, UserSubscribeForm, VendorMenuItemForm, DailyMenuForm, \
                    DailyOrderSelectionForm, VendorUpdateDailyOrderStatusForm, \
-                   DeliveryAgentUpdateDailyOrderStatusForm, AdminAssignDeliveryAgentForm, SubscriptionPlanForm, DummyPaymentForm, VendorSubscriptionForm
+                   DeliveryAgentUpdateDailyOrderStatusForm, AdminAssignDeliveryAgentForm, SubscriptionPlanForm, \
+                   DummyPaymentForm, VendorSubscriptionForm, BulkOrderForm
 
 # --- Helper functions for user_passes_test ---
 def is_resident(user):
@@ -22,8 +24,11 @@ def is_vendor(user):
 def is_delivery_agent(user):
     return user.is_authenticated and user.user_type == 'delivery_agent'
 
+def is_warden(user):
+    return user.is_authenticated and user.user_type == 'warden'
+
 def is_admin(user):
-    return user.is_authenticated and user.is_staff and user.is_superuser
+    return user.is_authenticated and (user.user_type == 'admin' or user.is_superuser)
 
 # --- General Views ---
 def home_view(request):
@@ -47,6 +52,11 @@ def login_view(request):
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            # Check for Warden approval
+            if user.user_type == 'warden' and not user.is_approved:
+                messages.error(request, 'Your account is pending Admin approval.')
+                return render(request, 'food_delivery/login.html')
+
             login(request, user)
             messages.success(request, f'Welcome back, {user.username}!')
             return redirect('dashboard')
@@ -554,6 +564,9 @@ def dashboard_view(request):
             order_date__gte=date.today()
         ).exclude(status__in=['delivered', 'cancelled']).order_by('order_date', 'status').prefetch_related('items__menu_item')
 
+    elif request.user.user_type == 'warden':
+        return redirect('warden_dashboard')
+
     elif request.user.user_type == 'admin':
         context['total_active_subscriptions'] = UserSubscription.objects.filter(status='active', end_date__gte=date.today()).count()
         context['pending_daily_orders_today'] = DailyOrder.objects.filter(order_date=date.today(), status__in=['submitted', 'prepared']).count()
@@ -561,6 +574,74 @@ def dashboard_view(request):
         context['delivery_agents_count'] = CustomUser.objects.filter(user_type='delivery_agent').count()
 
     return render(request, 'food_delivery/dashboard.html', context)
+
+@login_required
+@user_passes_test(is_warden)
+def warden_dashboard(request):
+    # Pending user approvals
+    pending_users = CustomUser.objects.filter(is_approved=False).exclude(is_superuser=True).exclude(user_type='admin')
+    
+    # Recent bulk orders
+    recent_bulk_orders = BulkOrder.objects.filter(warden=request.user).order_by('-ordered_at')[:5]
+
+    context = {
+        'pending_users_count': pending_users.count(),
+        'recent_bulk_orders': recent_bulk_orders,
+    }
+    return render(request, 'food_delivery/warden_dashboard.html', context)
+
+@login_required
+@user_passes_test(is_warden)
+def warden_manage_users(request):
+    users = CustomUser.objects.filter(user_type='resident').order_by('is_approved', 'username')
+    
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        user_to_mod = get_object_or_404(CustomUser, id=user_id)
+        
+        if action == 'approve':
+            user_to_mod.is_approved = True
+            user_to_mod.save()
+            messages.success(request, f"User {user_to_mod.username} approved.")
+        elif action == 'deactivate':
+            user_to_mod.is_active = False
+            user_to_mod.save()
+            messages.warning(request, f"User {user_to_mod.username} deactivated.")
+        elif action == 'activate':
+            user_to_mod.is_active = True
+            user_to_mod.save()
+            messages.success(request, f"User {user_to_mod.username} activated.")
+            
+        return redirect('warden_manage_users')
+
+    return render(request, 'food_delivery/warden_manage_users.html', {'users': users})
+
+@login_required
+@user_passes_test(is_warden)
+def warden_bulk_order(request):
+    if request.method == 'POST':
+        form = BulkOrderForm(request.POST)
+        if form.is_valid():
+            bulk_order = form.save(commit=False)
+            bulk_order.warden = request.user
+            bulk_order.status = 'submitted'
+            bulk_order.save()
+            
+            # Simple assumption: Bulk order just creates the order header for now. 
+            # In a real scenario, you'd select items. 
+            # Integrating item selection similar to resident order or just text description.
+            # user requirements said "Input: ... menu details (type, duration, price, menu)..."
+            # For this iteration, we'll stick to the basic form and maybe redirect to an item selection if needed,
+            # or assume the 'special_requirements' covers the manual menu description for bulk orders.
+            
+            messages.success(request, "Bulk order placed successfully.")
+            return redirect('warden_dashboard')
+    else:
+        form = BulkOrderForm()
+        
+    return render(request, 'food_delivery/warden_bulk_order.html', {'form': form})
+
 
 @login_required
 
@@ -575,13 +656,61 @@ def custom_admin_dashboard(request):
     return render(request, 'food_delivery/custom_admin/dashboard.html', context)
 
 @login_required
-
+@user_passes_test(is_admin)
 def custom_admin_manage_users(request):
-    users = CustomUser.objects.exclude(is_superuser=True).order_by('username')
+    users = CustomUser.objects.exclude(is_superuser=True).order_by('is_approved', 'username')
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        user_to_mod = get_object_or_404(CustomUser, id=user_id)
+        
+        if action == 'approve':
+            user_to_mod.is_approved = True
+            user_to_mod.save()
+            messages.success(request, f"User {user_to_mod.username} approved.")
+        elif action == 'deactivate':
+            user_to_mod.is_active = False
+            user_to_mod.save()
+            messages.warning(request, f"User {user_to_mod.username} deactivated.")
+        elif action == 'activate':
+            user_to_mod.is_active = True
+            user_to_mod.save()
+            messages.success(request, f"User {user_to_mod.username} activated.")
+            
+        return redirect('custom_admin_manage_users')
+
     context = {
         'users': users
     }
     return render(request, 'food_delivery/custom_admin/manage_users.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def custom_admin_manage_wardens(request):
+    wardens = CustomUser.objects.filter(user_type='warden').order_by('is_approved', 'username')
+    
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        warden_to_mod = get_object_or_404(CustomUser, id=user_id, user_type='warden')
+        
+        if action == 'approve':
+            warden_to_mod.is_approved = True
+            warden_to_mod.save()
+            messages.success(request, f"Warden {warden_to_mod.username} approved.")
+        elif action == 'deactivate':
+            warden_to_mod.is_active = False
+            warden_to_mod.save()
+            messages.warning(request, f"Warden {warden_to_mod.username} deactivated.")
+        elif action == 'activate':
+            warden_to_mod.is_active = True
+            warden_to_mod.save()
+            messages.success(request, f"Warden {warden_to_mod.username} activated.")
+            
+        return redirect('custom_admin_manage_wardens')
+
+    return render(request, 'food_delivery/custom_admin/manage_wardens.html', {'wardens': wardens})
 
 @login_required
 
