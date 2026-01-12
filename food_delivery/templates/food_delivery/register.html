@@ -38,7 +38,7 @@
             height: 5px;
             background: linear-gradient(90deg, #FF6B35, #FFD166, #2D3047);
         "></div>
-        
+
         <div style="
             position: absolute;
             top: -50px;
@@ -49,7 +49,7 @@
             border-radius: 50%;
             z-index: 0;
         "></div>
-        
+
         <div style="
             position: absolute;
             bottom: -50px;
@@ -79,7 +79,7 @@
             ">
                 <i class="fas fa-user-plus" style="transform: rotate(-45deg);"></i>
             </div>
-            
+
             <h2 style="
                 font-size: 2.2rem;
                 color: #2D3047;
@@ -93,7 +93,7 @@
             ">
                 Create Account
             </h2>
-            
+
             <p style="color: #666; font-size: 1rem; line-height: 1.5;">
                 Join our community of food lovers
             </p>
@@ -102,7 +102,7 @@
         <!-- Form -->
         <form method="post" style="position: relative; z-index: 1;">
             {% csrf_token %}
-            
+
             {% for field in form %}
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label for="{{ field.id_for_label }}" style="
@@ -115,19 +115,17 @@
                     align-items: center;
                     gap: 8px;
                 ">
-                    <i class="fas fa-{% if field.name == 'username' %}user{% elif field.name == 'email' %}envelope{% elif 'password' in field.name %}lock{% elif field.name == 'first_name' or field.name == 'last_name' %}id-card{% else %}edit{% endif %}" 
-                       style="color: #FF6B35; font-size: 0.9rem;"></i>
+                    <i class="fas fa-{% if field.name == 'username' %}user{% elif field.name == 'email' %}envelope{% elif 'password' in field.name %}lock{% elif field.name == 'first_name' or field.name == 'last_name' %}id-card{% else %}edit{% endif %}"
+                        style="color: #FF6B35; font-size: 0.9rem;"></i>
                     {{ field.label }}
                 </label>
-                
+
                 <div style="position: relative;">
                     {{ field }}
-                    
+
                     {% if 'password' in field.name %}
-                    <button type="button" 
-                            class="password-toggle"
-                            onclick="togglePassword('{{ field.id_for_label }}')"
-                            style="
+                    <button type="button" class="password-toggle" onclick="togglePassword('{{ field.id_for_label }}')"
+                        style="
                                 position: absolute;
                                 right: 15px;
                                 top: 50%;
@@ -138,14 +136,12 @@
                                 cursor: pointer;
                                 font-size: 1rem;
                                 transition: color 0.3s;
-                            "
-                            onmouseover="this.style.color='#FF6B35'"
-                            onmouseout="this.style.color='#999'">
+                            " onmouseover="this.style.color='#FF6B35'" onmouseout="this.style.color='#999'">
                         <i class="fas fa-eye"></i>
                     </button>
                     {% endif %}
                 </div>
-                
+
                 {% if field.errors %}
                 <div style="
                     color: #ff3860;
@@ -163,7 +159,9 @@
                     {{ field.errors }}
                 </div>
                 {% endif %}
-                
+
+                {% comment %}
+                Helper text removed as per user request
                 {% if field.help_text %}
                 <div style="
                     color: #666;
@@ -181,9 +179,10 @@
                     {{ field.help_text }}
                 </div>
                 {% endif %}
+                {% endcomment %}
             </div>
             {% endfor %}
-            
+
             <!-- Terms and Conditions -->
             <div style="
                 margin: 2rem 0;
@@ -193,16 +192,17 @@
                 border: 1px solid rgba(255, 209, 102, 0.3);
             ">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" required 
-                           style="
+                    <input type="checkbox" required style="
                                width: 20px;
                                height: 20px;
                                accent-color: #FF6B35;
                                cursor: pointer;
                            ">
                     <span style="color: #2D3047; font-size: 0.95rem; font-weight: 500;">
-                        I agree to the <a href="#" style="color: #FF6B35; text-decoration: none; font-weight: 600;">Terms of Service</a> 
-                        and <a href="#" style="color: #FF6B35; text-decoration: none; font-weight: 600;">Privacy Policy</a>
+                        I agree to the <a href="#"
+                            style="color: #FF6B35; text-decoration: none; font-weight: 600;">Terms of Service</a>
+                        and <a href="#" style="color: #FF6B35; text-decoration: none; font-weight: 600;">Privacy
+                            Policy</a>
                     </span>
                 </label>
             </div>
@@ -292,7 +292,7 @@
         transition: all 0.3s ease;
         box-sizing: border-box;
     }
-    
+
     .registration-card input:focus,
     .registration-card select:focus,
     .registration-card textarea:focus {
@@ -301,43 +301,44 @@
         box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         transform: translateY(-1px);
     }
-    
+
     .registration-card input:hover,
     .registration-card select:hover,
     .registration-card textarea:hover {
         border-color: #FFD166;
     }
-    
+
     /* Button Hover Effects */
     .register-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4) !important;
     }
-    
+
     .register-btn:hover span {
         width: 300px;
         height: 300px;
     }
-    
+
     .login-link:hover {
         background: #FF6B35 !important;
         color: white !important;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
     }
-    
+
     /* Animation */
     @keyframes slideUp {
         from {
             opacity: 0;
             transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-    
+
     /* Decorative gradient border */
     .registration-card::before {
         content: '';
@@ -349,54 +350,55 @@
         border-radius: 24px;
         padding: 2px;
         background: linear-gradient(135deg, #FF6B35, #FFD166, #2D3047);
-        -webkit-mask: 
-            linear-gradient(#fff 0 0) content-box, 
+        -webkit-mask:
+            linear-gradient(#fff 0 0) content-box,
             linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
         z-index: -1;
     }
-    
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .registration-card {
             padding: 2rem;
             margin: 1rem;
         }
-        
+
         .registration-container {
             padding: 1rem;
             background-attachment: scroll;
         }
-        
+
         h2 {
             font-size: 1.8rem !important;
         }
     }
-    
+
     @media (max-width: 480px) {
         .registration-card {
             padding: 1.5rem;
         }
-        
+
         .form-group {
             margin-bottom: 1rem;
         }
-        
-        .register-btn, .login-link {
+
+        .register-btn,
+        .login-link {
             width: 100% !important;
         }
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Password toggle functionality
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const toggle = event.target.closest('.password-toggle');
             const icon = toggle.querySelector('i');
-            
+
             if (field.type === 'password') {
                 field.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -407,30 +409,24 @@
                 icon.classList.add('fa-eye');
             }
         }
-        
-        // Add event listeners to all password toggles
-        document.querySelectorAll('.password-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const fieldId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
-                togglePassword(fieldId);
-            });
-        });
-        
+
+        // Event listeners removed to prevent double-binding with onclick attribute
+
         // Form field focus effects
         const formInputs = document.querySelectorAll('.registration-card input, .registration-card select, .registration-card textarea');
         formInputs.forEach(input => {
             // Add focus class
-            input.addEventListener('focus', function() {
+            input.addEventListener('focus', function () {
                 this.parentElement.style.transform = 'translateY(-2px)';
             });
-            
+
             // Remove focus class
-            input.addEventListener('blur', function() {
+            input.addEventListener('blur', function () {
                 this.parentElement.style.transform = 'translateY(0)';
             });
-            
+
             // Add floating label effect for non-empty fields
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 const label = this.parentElement.previousElementSibling;
                 if (this.value.trim() !== '') {
                     label.style.color = '#FF6B35';
@@ -440,25 +436,25 @@
                     label.style.fontWeight = '600';
                 }
             });
-            
+
             // Trigger input event on page load for pre-filled fields
             if (input.value.trim() !== '') {
                 input.dispatchEvent(new Event('input'));
             }
         });
-        
+
         // Button ripple effect
-        document.querySelector('.register-btn').addEventListener('mouseenter', function(e) {
+        document.querySelector('.register-btn').addEventListener('mouseenter', function (e) {
             const btn = this;
             const rect = btn.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
+
             const ripple = btn.querySelector('span');
             ripple.style.left = x + 'px';
             ripple.style.top = y + 'px';
         });
-        
+
         // Auto-hide messages after 5 seconds
         setTimeout(() => {
             document.querySelectorAll('.error-message, .help-text').forEach(el => {
@@ -468,13 +464,13 @@
             });
         }, 5000);
     });
-    
+
     // Expose togglePassword globally for onclick attribute
-    window.togglePassword = function(fieldId) {
+    window.togglePassword = function (fieldId) {
         const field = document.getElementById(fieldId);
         const toggle = document.querySelector(`.password-toggle[onclick*="${fieldId}"]`);
         const icon = toggle.querySelector('i');
-        
+
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.remove('fa-eye');

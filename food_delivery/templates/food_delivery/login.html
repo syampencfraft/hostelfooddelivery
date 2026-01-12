@@ -37,7 +37,7 @@
             height: 5px;
             background: linear-gradient(90deg, #FF6B35, #FFD166, #2D3047);
         "></div>
-        
+
         <div style="
             position: absolute;
             top: -50px;
@@ -48,7 +48,7 @@
             border-radius: 50%;
             z-index: 0;
         "></div>
-        
+
         <div style="
             position: absolute;
             bottom: -50px;
@@ -78,7 +78,7 @@
             ">
                 <i class="fas fa-sign-in-alt" style="transform: rotate(-45deg);"></i>
             </div>
-            
+
             <h2 style="
                 font-size: 2.2rem;
                 color: #2D3047;
@@ -92,7 +92,7 @@
             ">
                 Welcome Back
             </h2>
-            
+
             <p style="color: #666; font-size: 1rem; line-height: 1.5;">
                 Sign in to continue your food journey
             </p>
@@ -114,7 +114,8 @@
                 gap: 10px;
                 margin-bottom: 1rem;
             ">
-                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                <i
+                    class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
                 {{ message }}
             </div>
             {% endfor %}
@@ -124,7 +125,7 @@
         <!-- Form -->
         <form method="post" style="position: relative; z-index: 1;">
             {% csrf_token %}
-            
+
             <!-- Username Field -->
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label for="username" style="
@@ -140,15 +141,10 @@
                     <i class="fas fa-user" style="color: #FF6B35; font-size: 0.9rem;"></i>
                     Username
                 </label>
-                
+
                 <div style="position: relative;">
-                    <input type="text" 
-                           name="username" 
-                           id="username" 
-                           class="form-control" 
-                           required
-                           autocomplete="username"
-                           style="
+                    <input type="text" name="username" id="username" class="form-control" required
+                        autocomplete="username" style="
                                 width: 100%;
                                 padding: 0.9rem 1rem;
                                 padding-left: 2.5rem;
@@ -160,9 +156,8 @@
                                 color: #333;
                                 transition: all 0.3s ease;
                                 box-sizing: border-box;
-                           "
-                           placeholder="Enter your username or email">
-                    
+                           " placeholder="Enter your username or email">
+
                     <i class="fas fa-at" style="
                         position: absolute;
                         left: 15px;
@@ -173,7 +168,7 @@
                     "></i>
                 </div>
             </div>
-            
+
             <!-- Password Field -->
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -188,7 +183,7 @@
                         <i class="fas fa-lock" style="color: #FF6B35; font-size: 0.9rem;"></i>
                         Password
                     </label>
-                    
+
                     <a href="#" style="
                         color: #FF6B35;
                         text-decoration: none;
@@ -198,21 +193,14 @@
                         display: flex;
                         align-items: center;
                         gap: 4px;
-                    "
-                    onmouseover="this.style.color='#FF8B5C'"
-                    onmouseout="this.style.color='#FF6B35'">
+                    " onmouseover="this.style.color='#FF8B5C'" onmouseout="this.style.color='#FF6B35'">
                         <i class="fas fa-key"></i> Forgot Password?
                     </a>
                 </div>
-                
+
                 <div style="position: relative;">
-                    <input type="password" 
-                           name="password" 
-                           id="password" 
-                           class="form-control" 
-                           required
-                           autocomplete="current-password"
-                           style="
+                    <input type="password" name="password" id="password" class="form-control" required
+                        autocomplete="current-password" style="
                                 width: 100%;
                                 padding: 0.9rem 1rem;
                                 padding-left: 2.5rem;
@@ -225,9 +213,8 @@
                                 color: #333;
                                 transition: all 0.3s ease;
                                 box-sizing: border-box;
-                           "
-                           placeholder="Enter your password">
-                    
+                           " placeholder="Enter your password">
+
                     <i class="fas fa-key" style="
                         position: absolute;
                         left: 15px;
@@ -236,11 +223,8 @@
                         color: #999;
                         font-size: 0.9rem;
                     "></i>
-                    
-                    <button type="button" 
-                            class="password-toggle"
-                            onclick="togglePassword('password')"
-                            style="
+
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')" style="
                                 position: absolute;
                                 right: 15px;
                                 top: 50%;
@@ -251,14 +235,12 @@
                                 cursor: pointer;
                                 font-size: 1rem;
                                 transition: color 0.3s;
-                            "
-                            onmouseover="this.style.color='#FF6B35'"
-                            onmouseout="this.style.color='#999'">
+                            " onmouseover="this.style.color='#FF6B35'" onmouseout="this.style.color='#999'">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Remember Me Checkbox -->
             <div style="
                 margin-bottom: 2rem;
@@ -275,9 +257,7 @@
                     font-size: 0.95rem;
                     font-weight: 500;
                 ">
-                    <input type="checkbox" 
-                           name="remember" 
-                           style="
+                    <input type="checkbox" name="remember" style="
                                 width: 18px;
                                 height: 18px;
                                 accent-color: #FF6B35;
@@ -321,7 +301,7 @@
                     transition: width 0.6s, height 0.6s;
                 "></span>
             </button>
-            
+
             <!-- Divider -->
             <div style="
                 display: flex;
@@ -334,7 +314,7 @@
                 <span style="padding: 0 1rem;">Or continue with</span>
                 <div style="flex: 1; height: 1px; background: linear-gradient(90deg, #e1e5e9, transparent);"></div>
             </div>
-            
+
             <!-- Social Login Buttons -->
             <div style="
                 display: grid;
@@ -360,7 +340,7 @@
                     <i class="fab fa-google" style="color: #DB4437;"></i>
                     Google
                 </button>
-                
+
                 <button type="button" class="social-btn facebook-btn" style="
                     padding: 0.9rem;
                     border: 2px solid #e1e5e9;
@@ -429,64 +409,65 @@
         transition: all 0.3s ease;
         box-sizing: border-box;
     }
-    
+
     .login-card input:focus {
         outline: none;
         border-color: #FF6B35;
         box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         transform: translateY(-1px);
     }
-    
+
     .login-card input:hover {
         border-color: #FFD166;
     }
-    
+
     /* Button Hover Effects */
     .login-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(45, 48, 71, 0.4) !important;
     }
-    
+
     .login-btn:hover span {
         width: 300px;
         height: 300px;
     }
-    
+
     .register-link:hover {
         background: #FF6B35 !important;
         color: white !important;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
     }
-    
+
     /* Social Button Hover Effects */
     .social-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .google-btn:hover {
         border-color: #DB4437 !important;
         background: rgba(219, 68, 55, 0.05) !important;
     }
-    
+
     .facebook-btn:hover {
         border-color: #4267B2 !important;
         background: rgba(66, 103, 178, 0.05) !important;
     }
-    
+
     /* Animation */
     @keyframes slideUp {
         from {
             opacity: 0;
             transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-    
+
     /* Decorative gradient border */
     .login-card::before {
         content: '';
@@ -498,58 +479,59 @@
         border-radius: 24px;
         padding: 2px;
         background: linear-gradient(135deg, #2D3047, #FF6B35, #FFD166);
-        -webkit-mask: 
-            linear-gradient(#fff 0 0) content-box, 
+        -webkit-mask:
+            linear-gradient(#fff 0 0) content-box,
             linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
         z-index: -1;
     }
-    
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .login-card {
             padding: 2rem;
             margin: 1rem;
         }
-        
+
         .login-container {
             padding: 1rem;
             background-attachment: scroll;
         }
-        
+
         h2 {
             font-size: 1.8rem !important;
         }
-        
+
         .social-buttons {
             grid-template-columns: 1fr !important;
         }
     }
-    
+
     @media (max-width: 480px) {
         .login-card {
             padding: 1.5rem;
         }
-        
+
         .form-group {
             margin-bottom: 1rem;
         }
-        
-        .login-btn, .register-link {
+
+        .login-btn,
+        .register-link {
             width: 100% !important;
         }
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Password toggle functionality
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const toggle = document.querySelector(`.password-toggle[onclick*="${fieldId}"]`);
             const icon = toggle.querySelector('i');
-            
+
             if (field.type === 'password') {
                 field.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -562,32 +544,26 @@
                 toggle.setAttribute('title', 'Show password');
             }
         }
-        
-        // Add event listeners to password toggle
-        const passwordToggle = document.querySelector('.password-toggle');
-        if (passwordToggle) {
-            passwordToggle.addEventListener('click', function() {
-                togglePassword('password');
-            });
-        }
-        
+
+        // Event listener removed to prevent double-binding with onclick attribute
+
         // Form field focus effects
         const formInputs = document.querySelectorAll('.login-card input');
         formInputs.forEach(input => {
             // Add focus effect
-            input.addEventListener('focus', function() {
+            input.addEventListener('focus', function () {
                 this.style.transform = 'translateY(-1px)';
                 this.parentElement.style.transform = 'translateY(-2px)';
             });
-            
+
             // Remove focus effect
-            input.addEventListener('blur', function() {
+            input.addEventListener('blur', function () {
                 this.style.transform = 'translateY(0)';
                 this.parentElement.style.transform = 'translateY(0)';
             });
-            
+
             // Add floating label effect for non-empty fields
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 const label = this.parentElement.previousElementSibling;
                 if (label && label.tagName === 'DIV') {
                     const actualLabel = label.querySelector('label') || label;
@@ -600,22 +576,22 @@
                     }
                 }
             });
-            
+
             // Trigger input event on page load for pre-filled fields
             if (input.value.trim() !== '') {
                 input.dispatchEvent(new Event('input'));
             }
         });
-        
+
         // Button ripple effect
         const loginBtn = document.querySelector('.login-btn');
         if (loginBtn) {
-            loginBtn.addEventListener('mouseenter', function(e) {
+            loginBtn.addEventListener('mouseenter', function (e) {
                 const btn = this;
                 const rect = btn.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
+
                 const ripple = btn.querySelector('span');
                 if (ripple) {
                     ripple.style.left = x + 'px';
@@ -623,7 +599,7 @@
                 }
             });
         }
-        
+
         // Auto-hide messages after 5 seconds
         setTimeout(() => {
             document.querySelectorAll('.message').forEach(el => {
@@ -632,22 +608,22 @@
                 setTimeout(() => el.remove(), 500);
             });
         }, 5000);
-        
+
         // Social login button animations
         document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
+            btn.addEventListener('mouseenter', function () {
                 this.style.transform = 'translateY(-2px)';
             });
-            
-            btn.addEventListener('mouseleave', function() {
+
+            btn.addEventListener('mouseleave', function () {
                 this.style.transform = 'translateY(0)';
             });
         });
-        
+
         // Remember me checkbox styling
         const rememberCheckbox = document.querySelector('input[name="remember"]');
         if (rememberCheckbox) {
-            rememberCheckbox.addEventListener('change', function() {
+            rememberCheckbox.addEventListener('change', function () {
                 if (this.checked) {
                     this.parentElement.style.color = '#FF6B35';
                 } else {
@@ -656,13 +632,13 @@
             });
         }
     });
-    
+
     // Expose togglePassword globally for onclick attribute
-    window.togglePassword = function(fieldId) {
+    window.togglePassword = function (fieldId) {
         const field = document.getElementById(fieldId);
         const toggle = document.querySelector(`.password-toggle[onclick*="${fieldId}"]`);
         const icon = toggle.querySelector('i');
-        
+
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.remove('fa-eye');
@@ -673,11 +649,11 @@
             icon.classList.add('fa-eye');
         }
     };
-    
+
     // Forgot password functionality (placeholder)
     document.querySelectorAll('a[href="#"]').forEach(link => {
         if (link.textContent.includes('Forgot Password')) {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 alert('Forgot password feature coming soon!');
             });
