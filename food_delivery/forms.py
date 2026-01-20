@@ -248,9 +248,16 @@ class OrderStatusUpdateForm(forms.ModelForm):
 
 class BulkOrderForm(forms.ModelForm):
     # Form for Wardens to place bulk orders
+    items = forms.ModelMultipleChoiceField(
+        queryset=VendorMenuItem.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Menu Items"
+    )
+
     class Meta:
         model = BulkOrder
-        fields = ['meal_type', 'order_date', 'special_requirements']
+        fields = ['meal_type', 'order_date', 'items', 'special_requirements']
         widgets = {
             'order_date': forms.DateInput(attrs={'type': 'date'}),
             'special_requirements': forms.Textarea(attrs={'rows': 3}),
@@ -259,4 +266,6 @@ class BulkOrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['meal_type'].queryset = MealType.objects.all()
+        # sort items by vendor then name for better UX
+        self.fields['items'].queryset = VendorMenuItem.objects.all().order_by('vendor__username', 'name')
 

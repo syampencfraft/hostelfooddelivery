@@ -232,10 +232,15 @@ def resident_daily_order_select(request, meal_type_id=None, order_date_str=None)
         ).first()
 
         if daily_menu:
-            filtered_items = [
-                item for item in daily_menu.available_items.all()
-                if current_plan in item.subscription_plans.all()
-            ]
+            # Get plans associated with any of the user active subscriptions
+            user_plan_ids = [sub.plan.id for sub in user_subscriptions]
+            
+            filtered_items = []
+            for item in daily_menu.available_items.all():
+                # Item is available if it's global OR linked to one of user's plans
+                is_linked_to_plan = item.subscription_plans.filter(id__in=user_plan_ids).exists()
+                if item.is_available_globally or is_linked_to_plan:
+                    filtered_items.append(item)
 
     existing_daily_order = None
     form = None
@@ -639,14 +644,28 @@ def warden_bulk_order(request):
             bulk_order.status = 'submitted'
             bulk_order.save()
             
-            # Simple assumption: Bulk order just creates the order header for now. 
-            # In a real scenario, you'd select items. 
-            # Integrating item selection similar to resident order or just text description.
-            # user requirements said "Input: ... menu details (type, duration, price, menu)..."
-            # For this iteration, we'll stick to the basic form and maybe redirect to an item selection if needed,
-            # or assume the 'special_requirements' covers the manual menu description for bulk orders.
+            # Process selected items
+            selected_items = form.cleaned_data['items']
+            total_cost = 0
             
-            messages.success(request, "Bulk order placed successfully.")
+            for item in selected_items:
+                # Default quantity to 1 for now as per simple form
+                # In a more complex form, we'd need quantity per item
+                quantity = 1 
+                price = item.price
+                total_cost += price * quantity
+                
+                BulkOrderItem.objects.create(
+                    bulk_order=bulk_order,
+                    menu_item=item,
+                    quantity=quantity,
+                    price_at_order_time=price
+                )
+            
+            bulk_order.total_cost = total_cost
+            bulk_order.save()
+            
+            messages.success(request, f"Bulk order placed successfully. Total Cost: ₹{total_cost}")
             return redirect('warden_dashboard')
     else:
         form = BulkOrderForm()
