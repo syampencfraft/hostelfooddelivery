@@ -75,6 +75,17 @@ def logout_view(request):
 def subscription_plans_view(request):
 
     plans = SubscriptionPlan.objects.filter(is_active=True).order_by('name')
+
+    if request.user.is_authenticated and request.user.user_type == 'resident':
+        # Get IDs of plans the user currently has an active, valid subscription for
+        subscribed_plan_ids = UserSubscription.objects.filter(
+            user=request.user,
+            status='active',
+            end_date__gte=date.today()
+        ).values_list('plan', flat=True)
+        
+        plans = plans.exclude(id__in=subscribed_plan_ids)
+
     return render(request, 'food_delivery/subscription_plans.html', {'plans': plans})
 
 @login_required
@@ -579,7 +590,7 @@ def dashboard_view(request):
 @user_passes_test(is_warden)
 def warden_dashboard(request):
     # Pending user approvals
-    pending_users = CustomUser.objects.filter(is_approved=False).exclude(is_superuser=True).exclude(user_type='admin')
+    pending_users = CustomUser.objects.filter(is_approved=False, warden=request.user).exclude(is_superuser=True).exclude(user_type='admin')
     
     # Recent bulk orders
     recent_bulk_orders = BulkOrder.objects.filter(warden=request.user).order_by('-ordered_at')[:5]
@@ -593,7 +604,7 @@ def warden_dashboard(request):
 @login_required
 @user_passes_test(is_warden)
 def warden_manage_users(request):
-    users = CustomUser.objects.filter(user_type='resident').order_by('is_approved', 'username')
+    users = CustomUser.objects.filter(user_type='resident', warden=request.user).order_by('is_approved', 'username')
     
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
@@ -664,6 +675,14 @@ def custom_admin_manage_users(request):
         user_id = request.POST.get('user_id')
         action = request.POST.get('action')
         user_to_mod = get_object_or_404(CustomUser, id=user_id)
+        
+        # Prevent admin from modifying residents or other admins
+        if user_to_mod.user_type == 'resident':
+            messages.error(request, "Residents are managed by Wardens.")
+            return redirect('custom_admin_manage_users')
+        if user_to_mod.user_type == 'admin':
+            messages.error(request, "Admin users cannot be managed here.")
+            return redirect('custom_admin_manage_users')
         
         if action == 'approve':
             user_to_mod.is_approved = True
@@ -772,6 +791,15 @@ def admin_meal_type_list_create(request):
     meal_types = MealType.objects.all().order_by('name')
 
     if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'delete':
+            meal_type_id = request.POST.get('meal_type_id')
+            meal_type = get_object_or_404(MealType, id=meal_type_id)
+            meal_type.delete()
+            messages.success(request, f"Meal type '{meal_type.name}' deleted successfully.")
+            return redirect('admin_meal_type')
+            
         form = MealTypeForm(request.POST)
         if form.is_valid():
             form.save()

@@ -481,6 +481,31 @@
             icon.classList.add('fa-eye');
         }
     };
+
+    // Toggle Warden Field Visibility
+    const userTypeSelect = document.getElementById('id_user_type');
+    const wardenSelect = document.getElementById('id_warden');
+
+    if (userTypeSelect && wardenSelect) {
+        const wardenFieldGroup = wardenSelect.closest('.form-group');
+
+        function toggleWardenField() {
+            if (userTypeSelect.value === 'resident') {
+                wardenFieldGroup.style.display = 'block';
+                wardenSelect.required = true;
+            } else {
+                wardenFieldGroup.style.display = 'none';
+                wardenSelect.required = false;
+                wardenSelect.value = ''; // Clear selection
+            }
+        }
+
+        // Initial check
+        toggleWardenField();
+
+        // Change event
+        userTypeSelect.addEventListener('change', toggleWardenField);
+    }
 </script>
 
 {% endblock %}

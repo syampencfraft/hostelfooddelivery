@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     is_approved = models.BooleanField(default=False, help_text="Designates whether this user has been approved by an admin or warden.")
+    warden = models.ForeignKey('self', null=True, blank=True, limit_choices_to={'user_type': 'warden'}, on_delete=models.SET_NULL, related_name='residents', help_text="The warden responsible for this resident.")
 
     def __str__(self):
         return self.username

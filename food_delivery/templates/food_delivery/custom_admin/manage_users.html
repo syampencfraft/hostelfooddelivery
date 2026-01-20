@@ -55,6 +55,7 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if user.user_type != 'resident' and user.user_type != 'admin' %}
                                 <form method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -72,6 +73,11 @@
                                         class="btn btn-sm btn-info">Activate</button>
                                     {% endif %}
                                 </form>
+                                {% elif user.user_type == 'admin' %}
+                                <span class="text-muted">Superuser Only</span>
+                                {% else %}
+                                <span class="text-muted">Managed by Warden</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}

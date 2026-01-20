@@ -22,10 +22,10 @@
             Delicious Food, <span style="color: var(--accent);">Delivered</span> to Your Doorstep
         </h1>
         <p style="font-size: 1.3rem; margin-bottom: 2.5rem; opacity: 0.9; line-height: 1.6;">
-            Experience the convenience of fresh, hot meals delivered right to your hostel room. 
+            Experience the convenience of fresh, hot meals delivered right to your hostel room.
             Subscribe to plans or order daily - your choice!
         </p>
-        
+
         {% if not user.is_authenticated %}
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
@@ -60,7 +60,7 @@
         </div>
         {% endif %}
     </div>
-    
+
     <!-- Floating food icons -->
     <div style="position: absolute; bottom: -30px; left: 5%; font-size: 2rem; color: var(--accent); opacity: 0.3;">
         <i class="fas fa-pizza-slice"></i>
@@ -94,7 +94,7 @@
         <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">500+</h3>
         <p style="color: var(--gray); font-weight: 500;">Happy Residents</p>
     </div>
-    
+
     <div class="stat-card" style="
         background: white;
         padding: 2rem;
@@ -109,7 +109,7 @@
         <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">1000+</h3>
         <p style="color: var(--gray); font-weight: 500;">Meals Delivered Daily</p>
     </div>
-    
+
     <div class="stat-card" style="
         background: white;
         padding: 2rem;
@@ -124,7 +124,7 @@
         <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">30 min</h3>
         <p style="color: var(--gray); font-weight: 500;">Average Delivery Time</p>
     </div>
-    
+
     <div class="stat-card" style="
         background: white;
         padding: 2rem;
@@ -144,14 +144,15 @@
 <!-- Features Section -->
 <section id="features" style="margin-bottom: 4rem;">
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+        <h2
+            style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
             How It <span style="color: var(--primary);">Works</span>
         </h2>
         <p style="font-size: 1.1rem; color: var(--gray); max-width: 600px; margin: 0 auto;">
             Simple steps to get delicious food delivered to your room
         </p>
     </div>
-    
+
     <div style="
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -186,7 +187,7 @@
                 Create your account as a resident, vendor, or delivery agent
             </p>
         </div>
-        
+
         <div class="feature-step" style="
             background: white;
             padding: 2rem;
@@ -215,7 +216,7 @@
                 Select a subscription or order daily meals as per your preference
             </p>
         </div>
-        
+
         <div class="feature-step" style="
             background: white;
             padding: 2rem;
@@ -250,14 +251,15 @@
 <!-- User Types Section -->
 <section style="margin-bottom: 4rem;">
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+        <h2
+            style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
             Join Our <span style="color: var(--primary);">Community</span>
         </h2>
         <p style="font-size: 1.1rem; color: var(--gray); max-width: 600px; margin: 0 auto;">
             Whether you're a resident, vendor, or delivery partner, we have a place for you
         </p>
     </div>
-    
+
     <div style="
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -310,7 +312,7 @@
                 {% endif %}
             </div>
         </div>
-        
+
         <!-- Vendor Card -->
         <div class="user-type-card" style="
             background: linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%);
@@ -366,7 +368,7 @@
                 {% endif %}
             </div>
         </div>
-        
+
         <!-- Delivery Agent Card -->
         <div class="user-type-card" style="
             background: linear-gradient(135deg, #FFFFFF 0%, #F0FFF4 100%);
@@ -423,16 +425,74 @@
             </div>
         </div>
     </div>
+
+    <!-- Warden Card -->
+    <div class="user-type-card" style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFF0F5 100%);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 2px solid rgba(220, 53, 69, 0.2);
+        ">
+        <div style="
+                background: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%);
+                padding: 2rem;
+                text-align: center;
+                color: white;
+            ">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">For Wardens</h3>
+            <p>Monitor and manage hostel food services</p>
+        </div>
+        <div style="padding: 2rem;">
+            <ul style="list-style: none; margin-bottom: 2rem;">
+                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    <span>Monitor quality and hygiene</span>
+                </li>
+                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    <span>Handle resident grievances</span>
+                </li>
+                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    <span>Oversee food delivery operations</span>
+                </li>
+            </ul>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn" style="
+                    width: 100%;
+                    background: #EE5253;
+                    color: white;
+                ">
+                <i class="fas fa-user-plus"></i> Join as Warden
+            </a>
+            {% elif user.user_type == 'warden' %}
+            <a href="{% url 'dashboard' %}" class="btn" style="
+                    width: 100%;
+                    background: #EE5253;
+                    color: white;
+                ">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    </div>
 </section>
 
 <!-- Testimonials -->
 <section style="margin-bottom: 4rem;">
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
+        <h2
+            style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem; font-family: 'Poppins', sans-serif;">
             What Our <span style="color: var(--primary);">Customers</span> Say
         </h2>
     </div>
-    
+
     <div style="
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -473,7 +533,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="testimonial" style="
             background: white;
             padding: 2rem;
@@ -523,10 +583,11 @@
     <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Poppins', sans-serif;">
         Ready to Enjoy <span style="color: var(--accent);">Delicious Meals</span>?
     </h2>
-    <p style="font-size: 1.2rem; margin-bottom: 2.5rem; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">
+    <p
+        style="font-size: 1.2rem; margin-bottom: 2.5rem; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">
         Join thousands of satisfied residents who enjoy fresh meals delivered to their rooms daily.
     </p>
-    
+
     {% if not user.is_authenticated %}
     <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
         <a href="{% url 'register' %}" class="btn" style="
@@ -561,22 +622,22 @@
 
 <!-- Add hover effects via JavaScript -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Add hover effects to cards
         const cards = document.querySelectorAll('.user-type-card, .feature-step, .stat-card, .testimonial');
-        
+
         cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
+            card.addEventListener('mouseenter', function () {
                 this.style.transform = 'translateY(-10px)';
                 this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
             });
-            
-            card.addEventListener('mouseleave', function() {
+
+            card.addEventListener('mouseleave', function () {
                 this.style.transform = 'translateY(0)';
                 this.style.boxShadow = 'var(--box-shadow)';
             });
         });
-        
+
         // Animate stats counting
         const statNumbers = document.querySelectorAll('.stat-card h3');
         statNumbers.forEach(stat => {
@@ -600,18 +661,43 @@
     .hero-section {
         animation: fadeIn 1s ease;
     }
-    
+
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
-    
-    .feature-step:nth-child(1) { animation-delay: 0.1s; }
-    .feature-step:nth-child(2) { animation-delay: 0.2s; }
-    .feature-step:nth-child(3) { animation-delay: 0.3s; }
-    
-    .user-type-card:nth-child(1) { animation-delay: 0.1s; }
-    .user-type-card:nth-child(2) { animation-delay: 0.2s; }
-    .user-type-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .feature-step:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .feature-step:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .feature-step:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .user-type-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .user-type-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .user-type-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .user-type-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
 </style>
 {% endblock %}

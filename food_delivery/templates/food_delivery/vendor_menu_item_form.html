@@ -1,33 +1,326 @@
 {% extends 'food_delivery/base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} | FoodieExpress{% endblock %}
 
 {% block content %}
-<h2>{{ title }}</h2>
-<a href="{% url 'vendor_manage_subscriptions' %}" class="btn btn-primary">
-    Manage My Subscription Plans
-</a>
+<div class="form-container" style="
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+">
+    <div class="form-card" style="
+        max-width: 900px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    ">
+        <!-- Decorative Border -->
+        <div style="
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #FF6B35, #FFD166, #2D3047);
+        "></div>
 
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    {% if form.errors %}
-        <div style="color:red;">
-            <strong>Please fix the errors below:</strong>
-            {{ form.errors }}
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <div style="
+                width: 70px; height: 70px;
+                background: linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%);
+                border-radius: 18px;
+                display: flex; align-items: center; justify-content: center;
+                margin: 0 auto 1.5rem;
+                color: white; font-size: 1.8rem;
+                transform: rotate(45deg);
+                box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+            ">
+                <i class="fas fa-hamburger" style="transform: rotate(-45deg);"></i>
+            </div>
+            <h2 style="
+                font-size: 2rem; font-weight: 800; color: #2D3047;
+                font-family: 'Poppins', sans-serif;
+                background: linear-gradient(135deg, #2D3047 0%, #FF6B35 100%);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            ">{{ title }}</h2>
+            <div style="margin-top: 10px;">
+                <a href="{% url 'vendor_manage_subscriptions' %}"
+                    style="color: #FF6B35; font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+                    <i class="fas fa-crown"></i> Manage Subscription Plans
+                </a>
+            </div>
         </div>
-    {% endif %}
 
-    {{ form.as_p }}
+        <form method="post" enctype="multipart/form-data" class="custom-form">
+            {% csrf_token %}
 
-    {% if not form.subscription_plans.field.queryset %}
-        <p style="color:red;">
-            ⚠ You have no active subscription plans.
-            You can still add menu items, but they won’t be linked to any plan.
-        </p>
-    {% endif %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="
+                background: rgba(255, 56, 96, 0.1); border-left: 4px solid #ff3860;
+                color: #ff3860; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;
+            ">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
 
-    <button type="submit" class="button button-success">Save Item</button>
-    <a href="{% url 'vendor_menu_item_list' %}" class="button button-secondary">Cancel</a>
-</form>
+            <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <!-- Name Field -->
+                <div class="form-group" style="flex: 2; min-width: 300px;">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        <i class="fas fa-tag"></i> Item Name
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="error-msg">{{ form.name.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Price Field -->
+                <div class="form-group" style="flex: 1; min-width: 150px;">
+                    <label for="{{ form.price.id_for_label }}" class="form-label">
+                        <i class="fas fa-rupee-sign"></i> Price
+                    </label>
+                    {{ form.price }}
+                    {% if form.price.errors %}<div class="error-msg">{{ form.price.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <!-- Meal Type Field -->
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label for="{{ form.meal_type.id_for_label }}" class="form-label">
+                        <i class="fas fa-coffee"></i> Meal Type
+                    </label>
+                    {{ form.meal_type }}
+                    {% if form.meal_type.errors %}<div class="error-msg">{{ form.meal_type.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Image Field -->
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label for="{{ form.image.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i> Food Image
+                    </label>
+                    {{ form.image }}
+                    {% if form.image.errors %}<div class="error-msg">{{ form.image.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="{{ form.description.id_for_label }}" class="form-label">
+                    <i class="fas fa-align-left"></i> Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="error-msg">{{ form.description.errors }}</div>{% endif %}
+            </div>
+
+            <!-- Subscription Plans (Checkbox Select Multiple) -->
+            <div class="form-group" style="margin-top: 2rem; margin-bottom: 2rem;">
+                <label class="form-label">
+                    <i class="fas fa-layer-group"></i> Linked Subscription Plans
+                </label>
+
+                {% if not form.subscription_plans.field.queryset %}
+                <div class="alert alert-warning"
+                    style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; border: 1px solid #ffeeba;">
+                    <i class="fas fa-exclamation-triangle"></i> You have no active subscription plans.
+                    This item will not be linked to any plan.
+                </div>
+                {% else %}
+                <div class="items-grid">
+                    {% for checkbox in form.subscription_plans %}
+                    <label class="item-checkbox-wrapper">
+                        <div class="checkbox-input">
+                            {{ checkbox.tag }}
+                        </div>
+                        <span style="font-weight: 500; color: #495057;">{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.subscription_plans.errors %}
+                <div class="error-msg">{{ form.subscription_plans.errors }}</div>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Is Globally Available -->
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="item-checkbox-wrapper"
+                    style="display: inline-flex; width: auto; background: #e9f7ef; border-color: #28a745;">
+                    <div class="checkbox-input">
+                        {{ form.is_available_globally }}
+                    </div>
+                    <span style="font-weight: 600; color: #28a745;">
+                        <i class="fas fa-globe"></i> Make Available Globally?
+                    </span>
+                </label>
+                <p class="help-text" style="margin-left: 10px; display: inline-block; color: #666; font-size: 0.9rem;">
+                    (Visible to all users, even those without a plan)
+                </p>
+            </div>
+
+            <div style="margin-top: 2.5rem; text-align: right; border-top: 1px solid #eee; padding-top: 20px;">
+                <a href="{% url 'vendor_menu_item_list' %}" class="btn-cancel">Cancel</a>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save" style="margin-right: 8px;"></i> Save Item
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Shared Premium Styles */
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #2D3047;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label i {
+        color: #FF6B35;
+        margin-right: 8px;
+    }
+
+    .custom-form input[type="text"],
+    .custom-form input[type="date"],
+    .custom-form input[type="number"],
+    .custom-form select,
+    .custom-form textarea,
+    .custom-form input[type="file"] {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .custom-form input:focus,
+    .custom-form select:focus,
+    .custom-form textarea:focus {
+        border-color: #FF6B35;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .custom-form input[type="file"] {
+        padding: 10px;
+    }
+
+    /* Grid for Checkboxes */
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e1e5e9;
+    }
+
+    .item-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        background: white;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .item-checkbox-wrapper:hover {
+        border-color: #FFD166;
+        transform: translateY(-2px);
+    }
+
+    .item-checkbox-wrapper input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+        accent-color: #FF6B35;
+    }
+
+    .item-checkbox-wrapper:has(input:checked) {
+        border-color: #FF6B35;
+        background: rgba(255, 107, 53, 0.05);
+    }
+
+    .error-msg {
+        color: #ff3860;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .error-msg::before {
+        content: '\f06a';
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Buttons */
+    .submit-btn {
+        background: linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%);
+        color: white;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4) !important;
+    }
+
+    .btn-cancel {
+        display: inline-block;
+        padding: 12px 25px;
+        color: #6c757d;
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 15px;
+        transition: color 0.3s;
+    }
+
+    .btn-cancel:hover {
+        color: #343a40;
+    }
+</style>
 {% endblock %}

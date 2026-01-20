@@ -1,0 +1,302 @@
+{% extends 'food_delivery/base.html' %}
+{% load static %}
+{% block title %}Track Order #{{ order.id }} | FoodieExpress{% endblock %}
+
+{% block content %}
+<div class="tracking-container" style="
+    min-height: 100vh;
+    background: #f0f2f5;
+    padding: 2rem;
+    font-family: 'Poppins', sans-serif;
+">
+    <div class="tracking-card" style="
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        overflow: hidden;
+        animation: fadeIn 0.5s ease-out;
+    ">
+        <!-- Header -->
+        <div class="card-header" style="
+            background: linear-gradient(135deg, #2D3047 0%, #4a4e69 100%);
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            position: relative;
+        ">
+            <h2 style="
+                margin: 0; font-weight: 700; font-size: 1.8rem;
+                display: flex; align-items: center; justify-content: center; gap: 10px;
+            ">
+                <i class="fas fa-map-marked-alt" style="color: #FFD166;"></i>
+                Live Order Tracking
+            </h2>
+            <p style="margin: 5px 0 0; opacity: 0.8; font-size: 0.9rem;">Order ID: #{{ order.id }} | {{
+                order.order_date|date:"M d, Y" }}</p>
+
+            <div style="position: absolute; right: 20px; top: 20px;">
+                <button onclick="location.reload()" class="refresh-btn" title="Refresh Status">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body" style="padding: 2.5rem;">
+
+            <!-- Order Info -->
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <div style="
+                    display: inline-block;
+                    background: #fff5f0;
+                    color: #FF6B35;
+                    padding: 8px 20px;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    border: 1px solid #ffe3d6;
+                ">
+                    <i class="fas fa-utensils"></i> {{ order.meal_type.name }} Meal
+                </div>
+            </div>
+
+            <!-- Progress Stepper -->
+            <div class="stepper-wrapper">
+                <!-- Step 1: Placed -->
+                <div class="stepper-item {% if order.status != 'cancelled' %}active{% endif %}">
+                    <div class="step-counter"><i class="fas fa-receipt"></i></div>
+                    <div class="step-name">Order Placed</div>
+                </div>
+
+                <!-- Step 2: Preparing (Vendor Accepted/Prepared) -->
+                <div
+                    class="stepper-item {% if order.status == 'prepared' or order.status == 'out_for_delivery' or order.status == 'delivered' %}active{% endif %}">
+                    <div class="step-counter"><i class="fas fa-fire"></i></div>
+                    <div class="step-name">Preparing</div>
+                </div>
+
+                <!-- Step 3: Out for Delivery -->
+                <div
+                    class="stepper-item {% if order.status == 'out_for_delivery' or order.status == 'delivered' %}active{% endif %}">
+                    <div class="step-counter"><i class="fas fa-biking"></i></div>
+                    <div class="step-name">Out for Delivery</div>
+                </div>
+
+                <!-- Step 4: Delivered -->
+                <div class="stepper-item {% if order.status == 'delivered' %}active{% endif %}">
+                    <div class="step-counter"><i class="fas fa-check-circle"></i></div>
+                    <div class="step-name">Delivered</div>
+                </div>
+            </div>
+
+            <!-- Current Status Message -->
+            <div class="status-message" style="margin-top: 3rem; text-align: center;">
+                {% if order.status == 'cancelled' %}
+                <div class="alert alert-danger" style="border-radius: 12px; padding: 1.5rem;">
+                    <i class="fas fa-times-circle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                    <strong>Order Cancelled</strong><br>
+                    We're sorry, this order has been cancelled.
+                </div>
+                {% elif order.status == 'delivered' %}
+                <div class="alert alert-success"
+                    style="border-radius: 12px; padding: 1.5rem; background: #e9f7ef; border-color: #28a745; color: #155724;">
+                    <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                    <strong>Delivered!</strong><br>
+                    Enjoy your meal!
+                </div>
+                {% else %}
+                <div class="alert alert-info"
+                    style="border-radius: 12px; padding: 1.5rem; background: #e7f5ff; border-color: #0d6efd; color: #084298;">
+                    <div class="spinner-border text-primary" role="status"
+                        style="width: 2rem; height: 2rem; margin-bottom: 10px;"></div><br>
+                    <strong>
+                        {% if order.status == 'prepared' %}
+                        Your meal is ready and waiting for pickup.
+                        {% elif order.status == 'out_for_delivery' %}
+                        Your meal is on the way!
+                        {% else %}
+                        We have received your order.
+                        {% endif %}
+                    </strong>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Delivery Details -->
+            {% if order.delivery_agent %}
+            <div class="agent-card" style="
+                margin-top: 2rem;
+                background: white;
+                border: 1px solid #e1e5e9;
+                border-radius: 15px;
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                animation: slideUp 0.5s ease-out;
+            ">
+                <div style="
+                    width: 60px; height: 60px;
+                    background: #f1f3f5;
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.5rem; color: #adb5bd;
+                ">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h5 style="margin: 0; color: #2D3047; font-weight: 700;">{{ order.delivery_agent.username }}</h5>
+                    <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">Your Delivery Partner</p>
+                </div>
+                <div style="text-align: right;">
+                    {% if order.delivery_agent.phone_number %}
+                    <a href="tel:{{ order.delivery_agent.phone_number }}" class="phone-btn">
+                        <i class="fas fa-phone-alt"></i> Call
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Auto Refresh Script -->
+        <script>
+            // Refresh every 10 seconds only if order is not final
+            {% if order.status != 'delivered' and order.status != 'cancelled' %}
+            setTimeout(function () {
+                location.reload();
+            }, 10000);
+            {% endif %}
+        </script>
+    </div>
+</div>
+
+<style>
+    /* Stepper CSS */
+    .stepper-wrapper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .stepper-wrapper::before {
+        content: "";
+        position: absolute;
+        top: 25px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e9ecef;
+        z-index: 1;
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .stepper-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        z-index: 2;
+    }
+
+    .step-counter {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e9ecef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        color: #adb5bd;
+        transition: all 0.3s;
+    }
+
+    .step-name {
+        font-size: 0.9rem;
+        color: #adb5bd;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    /* Active State */
+    .stepper-item.active .step-counter {
+        border-color: #FF6B35;
+        background: #FF6B35;
+        color: white;
+        box-shadow: 0 0 0 5px rgba(255, 107, 53, 0.2);
+    }
+
+    .stepper-item.active .step-name {
+        color: #2D3047;
+        font-weight: 700;
+    }
+
+    /* Passed Steps handled by logic or CSS pseudo-classes if needed. 
+       For simplicity, we treat 'active' as 'current or passed' based on logic above */
+
+    .refresh-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(180deg);
+    }
+
+    .phone-btn {
+        display: inline-block;
+        background: #e7f5ff;
+        color: #0d6efd;
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .phone-btn:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

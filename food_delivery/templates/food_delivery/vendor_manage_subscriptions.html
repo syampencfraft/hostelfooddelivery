@@ -1,12 +1,266 @@
-<!-- food_delivery/templates/food_delivery/vendor_manage_subscriptions.html -->
 {% extends 'food_delivery/base.html' %}
-{% block title %}Manage My Subscriptions{% endblock %}
+{% block title %}Manage Subscriptions | FoodieExpress{% endblock %}
+
 {% block content %}
-    <h2>Manage Subscription Plan Offerings</h2>
-    <p>Select the plans that you are able to provide meals for. The menu items you add can then be assigned to these plans.</p>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button button-success">Save My Offerings</button>
-    </form>
+<div class="form-container" style="
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+">
+    <div class="form-card" style="
+        max-width: 800px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    ">
+        <!-- Decorative Border -->
+        <div style="
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #FF6B35, #FFD166, #2D3047);
+        "></div>
+
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <div style="
+                width: 70px; height: 70px;
+                background: linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%);
+                border-radius: 18px;
+                display: flex; align-items: center; justify-content: center;
+                margin: 0 auto 1.5rem;
+                color: white; font-size: 1.8rem;
+                transform: rotate(45deg);
+                box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+            ">
+                <i class="fas fa-handshake" style="transform: rotate(-45deg);"></i>
+            </div>
+            <h2 style="
+                font-size: 2rem; font-weight: 800; color: #2D3047;
+                font-family: 'Poppins', sans-serif;
+                background: linear-gradient(135deg, #2D3047 0%, #FF6B35 100%);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            ">Manage Offerings</h2>
+            <p style="color: #666; margin-top: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Select the subscription plans you are able to provide meals for. Your menu items can only be linked to
+                plans you select here.
+            </p>
+        </div>
+
+        <form method="post" class="custom-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="
+                background: rgba(255, 56, 96, 0.1); border-left: 4px solid #ff3860;
+                color: #ff3860; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;
+            ">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- Subscription Plans Grid -->
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label">
+                    <i class="fas fa-clipboard-check"></i> Select Subscription Plans
+                </label>
+
+                <div class="plans-grid">
+                    {% for checkbox in form.subscription_plans %}
+                    <label class="plan-checkbox-card">
+                        <div class="checkbox-input-wrapper">
+                            {{ checkbox.tag }}
+                        </div>
+                        <div class="plan-details">
+                            <span class="plan-name">{{ checkbox.choice_label }}</span>
+                        </div>
+                        <div class="check-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.subscription_plans.errors %}
+                <div class="error-msg">{{ form.subscription_plans.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 3rem; text-align: right; border-top: 1px solid #eee; padding-top: 25px;">
+                <a href="{% url 'dashboard' %}" class="btn-cancel">Return to Dashboard</a>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save" style="margin-right: 8px;"></i> Save Offerings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Shared Premium Styles */
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #2D3047;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .form-label i {
+        color: #FF6B35;
+        margin-right: 10px;
+    }
+
+    /* Grid for Plans */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .plan-checkbox-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background: white;
+        border-radius: 16px;
+        border: 2px solid #e1e5e9;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .plan-checkbox-card:hover {
+        border-color: #FFD166;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Hide default checkbox but keep it functional */
+    .checkbox-input-wrapper input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    /* Custom Checkbox Look */
+    .plan-details {
+        flex: 1;
+        padding-left: 10px;
+    }
+
+    .plan-name {
+        font-weight: 600;
+        color: #495057;
+        font-size: 1.05rem;
+        display: block;
+    }
+
+    .check-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #f1f3f5;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    /* Selected State */
+    .plan-checkbox-card:has(input:checked) {
+        border-color: #FF6B35;
+        background: linear-gradient(145deg, #fff, #fff5f0);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.15);
+    }
+
+    .plan-checkbox-card:has(input:checked) .plan-name {
+        color: #FF6B35;
+    }
+
+    .plan-checkbox-card:has(input:checked) .check-icon {
+        background: #FF6B35;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .error-msg {
+        color: #ff3860;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .error-msg::before {
+        content: '\f06a';
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Buttons */
+    .submit-btn {
+        background: linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%);
+        color: white;
+        border: none;
+        padding: 14px 40px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4) !important;
+    }
+
+    .btn-cancel {
+        display: inline-block;
+        padding: 12px 30px;
+        color: #6c757d;
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 20px;
+        transition: color 0.3s;
+    }
+
+    .btn-cancel:hover {
+        color: #343a40;
+        text-decoration: underline;
+    }
+</style>
 {% endblock %}

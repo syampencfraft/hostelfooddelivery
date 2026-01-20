@@ -10,10 +10,21 @@ class CustomUserCreationForm(UserCreationForm):
     user_type = forms.ChoiceField(choices=CustomUser.USER_TYPE_CHOICES, initial='resident')
     phone_number = forms.CharField(max_length=15, required=False)
     address = forms.CharField(widget=forms.Textarea, required=False)
+    warden = forms.ModelChoiceField(queryset=CustomUser.objects.filter(user_type='warden'), required=False, empty_label="Select Warden")
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ('user_type', 'phone_number', 'address',)
+        fields = UserCreationForm.Meta.fields + ('user_type', 'phone_number', 'address', 'warden')
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        user_type = cleaned_data.get('user_type')
+        warden = cleaned_data.get('warden')
+        
+        if user_type == 'resident' and not warden:
+             self.add_error('warden', "Residents must select a warden.")
+        
+        return cleaned_data
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
