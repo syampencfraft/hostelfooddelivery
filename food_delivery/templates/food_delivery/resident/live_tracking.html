@@ -78,12 +78,19 @@
 
                 <!-- Step 3: Out for Delivery -->
                 <div
-                    class="stepper-item {% if order.status == 'out_for_delivery' or order.status == 'delivered' %}active{% endif %}">
+                    class="stepper-item {% if order.status == 'out_for_delivery' or order.status == 'reached_location' or order.status == 'delivered' %}active{% endif %}">
                     <div class="step-counter"><i class="fas fa-biking"></i></div>
                     <div class="step-name">Out for Delivery</div>
                 </div>
 
-                <!-- Step 4: Delivered -->
+                <!-- Step 4: Reached Location -->
+                <div
+                    class="stepper-item {% if order.status == 'reached_location' or order.status == 'delivered' %}active{% endif %}">
+                    <div class="step-counter"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="step-name">Reached Location</div>
+                </div>
+
+                <!-- Step 5: Delivered -->
                 <div class="stepper-item {% if order.status == 'delivered' %}active{% endif %}">
                     <div class="step-counter"><i class="fas fa-check-circle"></i></div>
                     <div class="step-name">Delivered</div>
@@ -115,6 +122,8 @@
                         Your meal is ready and waiting for pickup.
                         {% elif order.status == 'out_for_delivery' %}
                         Your meal is on the way!
+                        {% elif order.status == 'reached_location' %}
+                        The delivery agent has reached your location!
                         {% else %}
                         We have received your order.
                         {% endif %}

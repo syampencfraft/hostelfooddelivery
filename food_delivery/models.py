@@ -119,6 +119,7 @@ class DailyOrder(models.Model):
         ("submitted", "Submitted"),
         ("prepared", "Prepared"),
         ("out_for_delivery", "Out for Delivery"),
+        ("reached_location", "Reached Location"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
     )
@@ -145,6 +146,7 @@ class DailyOrder(models.Model):
     @property
     def total_order_cost(self):
         return sum(item.quantity * item.price_at_order_time for item in self.items.all())
+
 
 
 class DailyOrderItem(models.Model):

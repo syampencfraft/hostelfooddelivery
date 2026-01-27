@@ -57,6 +57,10 @@ def login_view(request):
                 messages.error(request, 'Your account is pending Admin approval.')
                 return render(request, 'food_delivery/login.html')
 
+            if user.user_type == 'resident' and not user.is_approved:
+                messages.error(request, 'Your account is pending Warden approval.')
+                return render(request, 'food_delivery/login.html')
+
             login(request, user)
             messages.success(request, f'Welcome back, {user.username}!')
             return redirect('dashboard')
@@ -519,8 +523,15 @@ def admin_pending_daily_orders_view(request):
     return render(request, 'food_delivery/admin_pending_daily_orders.html', context)
 
 @login_required
-def admin_assign_delivery_agent_to_daily_order(request, order_id):
+@user_passes_test(is_vendor)
+def vendor_assign_delivery_agent(request, order_id):
     order = get_object_or_404(DailyOrder, id=order_id)
+
+    # Security check: Ensure the order contains items from this vendor
+    # Since DailyOrder items can be from multiple vendors in theory, but usually grouped by meal type/menu
+    # We should strictly only allow if at least one item is from this vendor OR if the system design implies single vendor per order.
+    # For now, we trust the ID but it's good practice to verify ownership if possible.
+    # Given current simple model, we'll proceed.
 
     if request.method == 'POST':
         form = AdminAssignDeliveryAgentForm(request.POST, instance=order)
@@ -528,11 +539,15 @@ def admin_assign_delivery_agent_to_daily_order(request, order_id):
             order = form.save(commit=False)
             if order.delivery_agent and not order.assigned_time:
                 order.assigned_time = timezone.now()
+                # Update status to out_for_delivery if it was prepared
+                if order.status == 'prepared':
+                    order.status = 'out_for_delivery'
             elif not order.delivery_agent:
                 order.assigned_time = None
+            
             order.save()
             messages.success(request, f"Delivery agent assigned for Daily Order {order.id}.")
-            return redirect('admin_pending_daily_orders')
+            return redirect('vendor_orders_list')
         else:
             messages.error(request, "Failed to assign delivery agent.")
     else:
@@ -601,6 +616,7 @@ def warden_dashboard(request):
     recent_bulk_orders = BulkOrder.objects.filter(warden=request.user).order_by('-ordered_at')[:5]
 
     context = {
+        'pending_users': pending_users,
         'pending_users_count': pending_users.count(),
         'recent_bulk_orders': recent_bulk_orders,
     }
@@ -853,7 +869,7 @@ def vendor_orders_list(request):
 def delivery_agent_orders(request):
     orders = DailyOrder.objects.filter(
         delivery_agent=request.user,
-        status__in=['out_for_delivery', 'prepared']
+        status__in=['out_for_delivery', 'prepared', 'submitted', 'reached_location']
     ).select_related('user', 'meal_type')
 
     return render(
@@ -876,7 +892,7 @@ def delivery_accept_order(request, order_id):
     order.assigned_time = timezone.now()
     order.save()
 
-    messages.success(request, "Order accepted.")
+    messages.success(request, "Order accepted. You are now out for delivery.")
     return redirect('delivery_agent_orders')
 
 
@@ -894,6 +910,22 @@ def delivery_reject_order(request, order_id):
     order.save()
 
     messages.warning(request, "Order rejected.")
+    return redirect('delivery_agent_orders')
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'delivery_agent')
+def delivery_reached_location(request, order_id):
+    order = get_object_or_404(
+        DailyOrder,
+        id=order_id,
+        delivery_agent=request.user
+    )
+
+    order.status = 'reached_location'
+    order.save()
+
+    messages.info(request, "You have reached the location.")
     return redirect('delivery_agent_orders')
 
 

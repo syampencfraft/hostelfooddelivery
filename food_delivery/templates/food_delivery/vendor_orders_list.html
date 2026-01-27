@@ -23,10 +23,15 @@
             <a href="{% url 'vendor_update_order_status' order.id %}">
                 Update Status
             </a>
+            {% if order.status == 'prepared' or order.status == 'submitted' %}
+            | <a href="{% url 'vendor_assign_delivery_agent' order.id %}">Assign Agent</a>
+            {% endif %}
         </td>
     </tr>
     {% empty %}
-    <tr><td colspan="5">No orders yet.</td></tr>
+    <tr>
+        <td colspan="5">No orders yet.</td>
+    </tr>
     {% endfor %}
 </table>
 {% endblock %}

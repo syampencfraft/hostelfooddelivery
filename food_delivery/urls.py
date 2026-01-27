@@ -44,7 +44,7 @@ urlpatterns = [
 
     # Admin URLs
     path('admin-daily-orders/pending/', views.admin_pending_daily_orders_view, name='admin_pending_daily_orders'),
-    path('admin-daily-order/<int:order_id>/assign-agent/', views.admin_assign_delivery_agent_to_daily_order, name='admin_assign_delivery_agent_to_daily_order'),
+
     path('site-admin/dashboard/', views.custom_admin_dashboard, name='custom_admin_dashboard'),
     path('site-admin/users/', views.custom_admin_manage_users, name='custom_admin_manage_users'),
     path('site-admin/wardens/', views.custom_admin_manage_wardens, name='custom_admin_manage_wardens'),
@@ -54,7 +54,7 @@ urlpatterns = [
     
     # We can keep the existing admin-related URLs or move them under the new prefix
     path('site-admin/daily-orders/pending/', views.admin_pending_daily_orders_view, name='admin_pending_daily_orders'),
-    path('site-admin/daily-order/<int:order_id>/assign-agent/', views.admin_assign_delivery_agent_to_daily_order, name='admin_assign_delivery_agent_to_daily_order'),
+    path('vendor/daily-order/<int:order_id>/assign-agent/', views.vendor_assign_delivery_agent, name='vendor_assign_delivery_agent'),
 
     path('subscribe/start/<int:plan_id>/', views.subscribe_to_plan_view, name='subscribe_to_plan'),
     path('payment/', views.payment_page, name='payment_page'),
@@ -90,6 +90,12 @@ path(
     ),
 
     path(
+        'delivery/order/<int:order_id>/reached-location/',
+        views.delivery_reached_location,
+        name='delivery_reached_location'
+    ),
+
+    path(
         'delivery/order/<int:order_id>/complete/',
         views.delivery_complete_order,
         name='delivery_complete_order'
@@ -113,11 +119,6 @@ path(
     'delivery/history/',
     views.delivery_agent_history,
     name='delivery_agent_history'
-),
-path(
-    'resident/order/<int:order_id>/track/',
-    views.resident_live_delivery_tracking,
-    name='resident_live_tracking'
 ),
 
 

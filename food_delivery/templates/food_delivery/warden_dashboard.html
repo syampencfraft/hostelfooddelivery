@@ -292,6 +292,54 @@
     </div>
 </div>
 
+<!-- Pending Approvals -->
+{% if pending_users %}
+<div class="table-container" style="margin-top: 2rem; border-left: 4px solid var(--warning);">
+    <div class="section-header">
+        <h3 class="section-title"><i class="fas fa-user-clock text-warning"></i> Pending Resident Approvals</h3>
+        <span class="badge badge-pending">{{ pending_users_count }} awaiting review</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Resident</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pending_user in pending_users %}
+                <tr>
+                    <td>
+                        <div class="user-info-cell">
+                            <div class="user-avatar-small">
+                                {{ pending_user.username|first|upper }}
+                            </div>
+                            <div class="user-details">
+                                <h5>{{ pending_user.username }}</h5>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ pending_user.email|default:"No email provided" }}</td>
+                    <td>
+                        <form action="{% url 'warden_manage_users' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ pending_user.id }}">
+                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-primary">
+                                <i class="fas fa-check"></i> Quick Approve
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <!-- Recent Activity -->
 <div class="table-container">
     <div class="section-header">

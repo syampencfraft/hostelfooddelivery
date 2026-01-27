@@ -117,6 +117,11 @@
         color: #155724;
     }
 
+    .status-submitted {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
     .card-footer {
         padding: 1rem 1.5rem;
         background: white;
@@ -182,17 +187,23 @@
             </div>
 
             <div class="card-footer">
-                {% if order.status == 'prepared' %}
+                {% if order.status == 'prepared' or order.status == 'submitted' %}
                 <div class="d-flex gap-2">
                     <a href="{% url 'delivery_accept_order' order.id %}" class="btn btn-success action-btn flex-grow-1">
                         <i class="fas fa-check"></i> Accept
                     </a>
+                    {% if order.status == 'prepared' %}
                     <a href="{% url 'delivery_reject_order' order.id %}"
                         class="btn btn-outline-danger action-btn flex-grow-1">
                         <i class="fas fa-times"></i> Reject
                     </a>
+                    {% endif %}
                 </div>
                 {% elif order.status == 'out_for_delivery' %}
+                <a href="{% url 'delivery_reached_location' order.id %}" class="btn btn-info action-btn text-white">
+                    <i class="fas fa-map-marker-alt"></i> Reached Location
+                </a>
+                {% elif order.status == 'reached_location' %}
                 <a href="{% url 'delivery_complete_order' order.id %}" class="btn btn-primary action-btn">
                     <i class="fas fa-box-open"></i> Mark as Delivered
                 </a>
